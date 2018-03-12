@@ -249,7 +249,7 @@ enum class ArticleSource(val url: String, val category: ArticleCategory, val dev
             ArticleDevice.XBOX_ONE,
             "xbox-gamer.fr"),
 
-    // little bonus ;)
+     //little bonus ;)
     PODCAST_BON_PORN("http://www.bonporn.com/rss.php?type=random",
             ArticleCategory.VIDEO,
             ArticleDevice.MOBILE,

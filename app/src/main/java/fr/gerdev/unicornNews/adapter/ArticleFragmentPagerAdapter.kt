@@ -20,7 +20,7 @@ class ArticleFragmentPagerAdapter(private val listener: CategoryProvider, fm: Fr
     }
 
     override fun getPageTitle(position: Int): CharSequence? {
-        return ArticleDevice.values()[position].name
+        return ArticleDevice.values()[position].name.replace("_"," ")
     }
 
     interface CategoryProvider {

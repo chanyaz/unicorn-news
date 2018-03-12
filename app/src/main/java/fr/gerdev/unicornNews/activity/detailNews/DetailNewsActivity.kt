@@ -7,8 +7,8 @@ import android.view.View
 import android.view.WindowManager
 import android.webkit.WebViewClient
 import fr.gerdev.unicornNews.R
-import kotlinx.android.synthetic.main.activity_detail_news.*
 import android.webkit.WebView
+import kotlinx.android.synthetic.main.activity_detail_news.*
 
 
 class DetailNewsActivity : AppCompatActivity() {
@@ -29,14 +29,13 @@ class DetailNewsActivity : AppCompatActivity() {
         val url = intent.getStringExtra(URL_KEY)
         articleWebView.webViewClient = object : WebViewClient() {
 
-            //not always triggered
+            //not always triggered ?
             override fun onPageFinished(view: WebView, url: String) {
                 progress.visibility=View.GONE
             }
 
             override fun onLoadResource(view: WebView?, url: String?) {
                 super.onLoadResource(view, url)
-                progress.visibility=View.GONE
             }
         }
 
