@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/all"
+        android:icon="@drawable/ic_event_note_black_24dp"
+        android:title="@string/all" />
+    <item
+        android:id="@+id/news"
+        android:icon="@drawable/ic_rss_feed_black_24dp"
+        android:title="@string/news" />
+    <item
+        android:id="@+id/tests"
+        android:icon="@drawable/ic_videogame_asset_black_24dp"
+        android:title="@string/tests" />
+    <item
+        android:id="@+id/podcasts"
+        android:icon="@drawable/ic_videocam_black_24dp"
+        android:title="@string/videos" />
+</menu>
