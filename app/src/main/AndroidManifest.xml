@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="fr.gerdev.newsvg">
+    package="fr.gerdev.unicornNews">
 
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
-        android:name=".application.App"
+        android:name="fr.gerdev.unicornNews.application.App"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".activity.tabNews.TabNewsActivity"
+            android:name="fr.gerdev.unicornNews.activity.tabNews.TabNewsActivity"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -22,7 +22,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".activity.detailNews.DetailNewsActivity"
+            android:name="fr.gerdev.unicornNews.activity.detailNews.DetailNewsActivity"
             android:theme="@style/Theme.AppCompat.NoActionBar" />
     </application>
 
