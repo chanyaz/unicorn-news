@@ -36,6 +36,7 @@ class TabNewsActivity : AppCompatActivity(), ArticleFragment.Listener, ArticleFr
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_tab_news)
         setSupportActionBar(my_toolbar)
+        my_toolbar.setLogo(R.drawable.ic_unicorn)
 
         category = ArticleCategory.GENERAL
         bottomSheetBehavior = BottomSheetBehavior.from(bottomNavigation)
