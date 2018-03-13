@@ -22,6 +22,11 @@ class DetailNewsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setFullscreen()
         setContentView(R.layout.activity_detail_news)
+        fab.setOnClickListener({
+            if (articleWebView.canGoBack()) articleWebView.goBack()
+            else finish()
+        })
+        fab.hide()
         loadArticle()
     }
 
@@ -32,19 +37,21 @@ class DetailNewsActivity : AppCompatActivity() {
 
             //not always triggered ?
             override fun onPageFinished(view: WebView, url: String) {
-                progress.visibility=View.GONE
             }
 
             override fun onLoadResource(view: WebView?, url: String?) {
                 super.onLoadResource(view, url)
                 Timber.i(url)
-                if (url == articleUrl)
+                if (url == articleUrl) {
                     progress.visibility = View.GONE
+                    fab.show()
+                }
             }
         }
 
         val webSettings = articleWebView.settings
         webSettings.javaScriptEnabled = true
+        articleWebView.setFab(fab)
         articleWebView.loadUrl(articleUrl)
     }
 
