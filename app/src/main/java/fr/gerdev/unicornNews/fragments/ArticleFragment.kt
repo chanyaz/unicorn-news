@@ -26,6 +26,7 @@ import fr.gerdev.unicornNews.model.ArticleDevice
 import fr.gerdev.unicornNews.repository.ArticleResult
 import kotlinx.android.synthetic.main.fragment_article.*
 import timber.log.Timber
+import java.util.*
 
 class ArticleFragment : Fragment() {
 
@@ -139,6 +140,12 @@ class ArticleFragment : Fragment() {
         emptyMsg.visibility = if (articles.isEmpty()) View.VISIBLE else View.GONE
     }
 
+    private fun unicoooooooornnnNews() {
+        val number = Random().nextInt(12)
+        if (number > 0) unicorn.visibility = View.GONE
+        else unicorn.visibility = View.VISIBLE
+    }
+
     private fun forceRefresh() {
         articles.clear()
         adapter?.notifyDataSetChanged()
@@ -150,6 +157,10 @@ class ArticleFragment : Fragment() {
     private fun color(@ColorRes color: Int) = ContextCompat.getColor(context!!, color)
 
     private fun onNewArticles(articles: List<Article>) {
+        if (this.articles.isEmpty()) {
+            unicoooooooornnnNews()
+        }
+
         val descriptions = articles.map { it.description }
         val newArticles = articles.filter { descriptions.contains(it.description) }
         Timber.i("${newArticles.count()} added to adapter")

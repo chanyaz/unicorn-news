@@ -72,6 +72,9 @@ dependencies {
     // Picasso
     implementation 'com.squareup.picasso:picasso:2.5.2'
 
+    // Android unicorn
+    implementation 'com.github.gmazzo:unicorn:0.3'
+
     // Test helpers for LiveData
     testImplementation "android.arch.core:core-testing:1.1.0"
 

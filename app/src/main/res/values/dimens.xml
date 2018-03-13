@@ -2,4 +2,5 @@
 <resources>
     <dimen name="card_round">12dp</dimen>
     <dimen name="elevation_progress">15dp</dimen>
+    <dimen name="bottomNavHeight">56dp</dimen>
 </resources>

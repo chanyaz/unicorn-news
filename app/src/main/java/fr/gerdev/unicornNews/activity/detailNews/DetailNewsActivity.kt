@@ -5,10 +5,11 @@ import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.view.View
 import android.view.WindowManager
+import android.webkit.WebView
 import android.webkit.WebViewClient
 import fr.gerdev.unicornNews.R
-import android.webkit.WebView
 import kotlinx.android.synthetic.main.activity_detail_news.*
+import timber.log.Timber
 
 
 class DetailNewsActivity : AppCompatActivity() {
@@ -26,7 +27,7 @@ class DetailNewsActivity : AppCompatActivity() {
 
     @SuppressLint("SetJavaScriptEnabled")
     private fun loadArticle() {
-        val url = intent.getStringExtra(URL_KEY)
+        val articleUrl = intent.getStringExtra(URL_KEY)
         articleWebView.webViewClient = object : WebViewClient() {
 
             //not always triggered ?
@@ -36,12 +37,15 @@ class DetailNewsActivity : AppCompatActivity() {
 
             override fun onLoadResource(view: WebView?, url: String?) {
                 super.onLoadResource(view, url)
+                Timber.i(url)
+                if (url == articleUrl)
+                    progress.visibility = View.GONE
             }
         }
 
         val webSettings = articleWebView.settings
         webSettings.javaScriptEnabled = true
-        articleWebView.loadUrl(url)
+        articleWebView.loadUrl(articleUrl)
     }
 
     private fun setFullscreen() {

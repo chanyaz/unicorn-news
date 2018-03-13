@@ -3,7 +3,7 @@
         xmlns:app="http://schemas.android.com/apk/res-auto"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:alpha="0.65"
+        android:alpha="0.36"
         app:cardBackgroundColor="@color/progress_background"
         app:cardCornerRadius="@dimen/card_round"
         app:cardElevation="@dimen/elevation_progress">
