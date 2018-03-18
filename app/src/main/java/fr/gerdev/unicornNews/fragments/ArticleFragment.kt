@@ -2,7 +2,6 @@ package fr.gerdev.unicornNews.fragments
 
 import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.Observer
-import android.arch.lifecycle.ViewModelProviders
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -23,25 +22,24 @@ import fr.gerdev.unicornNews.adapter.ArticleAdapter
 import fr.gerdev.unicornNews.model.Article
 import fr.gerdev.unicornNews.model.ArticleCategory
 import fr.gerdev.unicornNews.model.ArticleDevice
-import fr.gerdev.unicornNews.repository.ArticleResult
 import kotlinx.android.synthetic.main.fragment_article.*
-import timber.log.Timber
 import java.util.*
 
 class ArticleFragment : Fragment() {
 
-    private val articles: MutableList<Article> = mutableListOf()
+    private val articles: LinkedHashSet<Article> = linkedSetOf()
 
     private var adapter: ArticleAdapter? = null
-    private var refreshing: Boolean = false
     private var listener: Listener? = null
+    private var articleLiveData: LiveData<List<Article>>? = null
 
+    private lateinit var vm: TabNewsVM
     private lateinit var receiver: BroadcastReceiver
     private lateinit var category: ArticleCategory
     private lateinit var device: ArticleDevice
-    private lateinit var articleLiveData: LiveData<ArticleResult>
 
     companion object {
+        const val INTENT_ACTION_REFRESHED = "intent_action_refreshed"
         const val INTENT_ACTION_REFRESH = "intent_action_refresh"
 
         const val EXTRA_CATEGORY = "extra_category"
@@ -76,8 +74,14 @@ class ArticleFragment : Fragment() {
         device = ArticleDevice.valueOf(arguments?.getString(EXTRA_DEVICE)!!)
         receiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent) {
-                category = ArticleCategory.valueOf(intent.getStringExtra(EXTRA_CATEGORY))
-                forceRefresh()
+                when (intent.action) {
+                    INTENT_ACTION_REFRESH -> {
+                        category = ArticleCategory.valueOf(intent.getStringExtra(EXTRA_CATEGORY))
+                        forceRefresh()
+                    }
+                    INTENT_ACTION_REFRESHED -> refreshFinished()
+                }
+
             }
         }
 
@@ -86,7 +90,7 @@ class ArticleFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        LocalBroadcastManager.getInstance(context!!).registerReceiver(receiver, IntentFilter(INTENT_ACTION_REFRESH))
+        LocalBroadcastManager.getInstance(context!!).registerReceiver(receiver, IntentFilter(INTENT_ACTION_REFRESH, INTENT_ACTION_REFRESHED))
     }
 
     override fun onPause() {
@@ -94,26 +98,13 @@ class ArticleFragment : Fragment() {
         LocalBroadcastManager.getInstance(context!!).unregisterReceiver(receiver)
     }
 
-    private fun observeArticles(forceRefresh: Boolean = false) {
-        articleLiveData = ViewModelProviders.of(this).get(TabNewsVM::class.java).observeArticles(category, device, forceRefresh)
-        setRefreshing(true)
-        articleLiveData.observe(this, Observer<ArticleResult> { result ->
-            if (result?.articles?.isNotEmpty() == true) {
-                onNewArticles(result.articles)
-            }
+    private fun observeArticles() {
+        articleLiveData?.removeObservers(this)
+        articleLiveData = vm.getArticles(category, device)
+        swipeRefresh?.isRefreshing = true
 
-            if (this.articles.isNotEmpty()) {
-                emptyMsg.visibility = View.GONE
-            } else {
-                emptyMsg.visibility = View.VISIBLE
-            }
-
-            if (result?.refreshFinished == true) {
-                setRefreshing(false)
-                scrollToUp()
-            } else {
-                setRefreshing(true)
-            }
+        articleLiveData?.observe(this, Observer<List<Article>> { result ->
+            onArticlesReaded(result!!)
         })
     }
 
@@ -135,8 +126,6 @@ class ArticleFragment : Fragment() {
             forceRefresh()
         }
 
-        swipeRefresh.isRefreshing = refreshing
-
         emptyMsg.visibility = if (articles.isEmpty()) View.VISIBLE else View.GONE
     }
 
@@ -149,37 +138,24 @@ class ArticleFragment : Fragment() {
     private fun forceRefresh() {
         articles.clear()
         adapter?.notifyDataSetChanged()
-
-        articleLiveData.removeObservers(this)
-        observeArticles(true)
+        vm.getRefreshedArticles(category, device)
     }
 
     private fun color(@ColorRes color: Int) = ContextCompat.getColor(context!!, color)
 
-    private fun onNewArticles(articles: List<Article>) {
-        if (this.articles.isEmpty()) {
-            unicoooooooornnnNews()
-        }
-
-        val descriptions = articles.map { it.description }
-        val newArticles = articles.filter { descriptions.contains(it.description) }
-        Timber.i("${newArticles.count()} added to adapter")
-        this.articles.addAll(newArticles)
-        this.articles.sortByDescending { it.downloadDate }
-        adapter?.notifyItemRangeInserted(0, articles.count())
+    private fun onArticlesReaded(articles: List<Article>) {
+        unicoooooooornnnNews()
+        this.articles.clear()
+        val previousSize = this.articles.size
+        this.articles.addAll(articles.sortedByDescending { it.downloadDate })
+        adapter?.notifyItemRangeInserted(0, this.articles.size - previousSize)
     }
 
-    private fun scrollToUp() {
+    private fun refreshFinished() {
+        swipeRefresh.isRefreshing = false
         if (articlesView?.adapter?.itemCount != 0)
             articlesView?.scrollToPosition(0)
     }
 
     interface Listener
-
-    private fun setRefreshing(refreshing: Boolean) {
-        this.refreshing = refreshing
-        if (swipeRefresh != null) {
-            swipeRefresh.isRefreshing = refreshing
-        }
-    }
 }

@@ -17,7 +17,7 @@ import fr.gerdev.unicornNews.util.DateUtil
 import kotlinx.android.synthetic.main.article_item_row.view.*
 
 
-class ArticleAdapter(private val context: Context, private val articles: MutableList<Article>)
+class ArticleAdapter(private val context: Context, private val articles: Set<Article>)
     : RecyclerView.Adapter<ArticleAdapter.ArticlesVH>() {
 
     class ArticlesVH(private val context: Context, v: View) : RecyclerView.ViewHolder(v), View.OnClickListener {
@@ -76,7 +76,7 @@ class ArticleAdapter(private val context: Context, private val articles: Mutable
     override fun getItemCount(): Int = articles.size
 
     override fun onBindViewHolder(holder: ArticlesVH, position: Int) {
-        val article = articles[position]
+        val article = articles.toTypedArray()[position]
         holder.bindArticle(article)
     }
 }

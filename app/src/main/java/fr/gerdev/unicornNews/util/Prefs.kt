@@ -3,12 +3,12 @@ package fr.gerdev.unicornNews.util
 import android.content.Context
 import android.content.SharedPreferences
 import fr.gerdev.unicornNews.model.ArticleSource
-import fr.gerdev.unicornNews.repository.ArticleRepository
 
 // ger 09/03/18
 class Prefs {
     companion object {
         const val LAST_REFRESH_PREF = "last_refresh_prefs"
+        const val REFRESH_THRESHOLD = 10 * 60 * 1000
 
         fun shouldRefresh(context: Context, sources: List<ArticleSource>): Boolean {
             sources.forEach {
@@ -19,7 +19,7 @@ class Prefs {
 
         fun shouldRefresh(context: Context, source: ArticleSource): Boolean {
             val refreshTimestamp = getSharedPrefs(context).getLong(source.name, 0)
-            return refreshTimestamp < System.currentTimeMillis() - ArticleRepository.REFRESH_THRESHOLD
+            return refreshTimestamp < System.currentTimeMillis() - REFRESH_THRESHOLD
         }
 
         fun updateRefreshTime(context: Context, source: ArticleSource) {

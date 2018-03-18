@@ -1,11 +1,15 @@
 package fr.gerdev.unicornNews.repository
 
 import android.arch.lifecycle.LiveData
-import android.arch.lifecycle.MutableLiveData
 import android.content.Context
-import android.os.AsyncTask
+import android.content.Intent
+import android.support.v4.content.LocalBroadcastManager
 import fr.gerdev.unicornNews.database.AppDatabase
-import fr.gerdev.unicornNews.model.*
+import fr.gerdev.unicornNews.fragments.ArticleFragment
+import fr.gerdev.unicornNews.model.Article
+import fr.gerdev.unicornNews.model.ArticleParseListener
+import fr.gerdev.unicornNews.model.ArticleParser
+import fr.gerdev.unicornNews.model.ArticleSource
 import fr.gerdev.unicornNews.rest.RssService
 import fr.gerdev.unicornNews.util.Prefs
 import timber.log.Timber
@@ -13,67 +17,47 @@ import timber.log.Timber
 data class ArticleResult(val refreshFinished: Boolean, val articles: List<Article>)
 
 class ArticleRepository(private val context: Context,
-                        val rssService: RssService) {
-    companion object {
-        const val REFRESH_THRESHOLD = 1000 * 60 * 10
-    }
+                        private val rssService: RssService) {
 
     private var parser: ArticleParser? = null
 
-    fun getArticles(category: ArticleCategory,
-                    device: ArticleDevice,
-                    forceRefresh: Boolean): LiveData<ArticleResult> {
-        val articlesLiveData: MutableLiveData<ArticleResult> = MutableLiveData()
-        AsyncTask.execute {
-            val sources = ArticleSource.values()
-                    .filter { it.category == category && it.device == device }
+    fun readStoredArticles(sources: List<ArticleSource>): LiveData<List<Article>> {
+        return AppDatabase.getInstance(context).articleDao().asLiveDataBySource(sources.map { it.name })
+    }
 
-            if (!sources.isEmpty() && (forceRefresh || Prefs.shouldRefresh(context, sources))) {
+    fun updateArticles(sources: List<ArticleSource>) {
+        Timber.i("${sources.size} source(s) to refresh")
 
-                postDatabaseArticles(articlesLiveData, sources, false)
+        parser?.stopParse()
+        parser = ArticleParser(object : ArticleParseListener {
 
-                if (!forceRefresh) sources.filter { Prefs.shouldRefresh(context, it) }
-                Timber.i("download category : ${category.name} & device ${device.name}")
-                Timber.i("${sources.size} source(s) to refresh")
+            override fun onParsedAndFiltered(articles: List<Article>) {
 
-                parser?.stopParse()
+                val articleDao = AppDatabase
+                        .getInstance(context)
+                        .articleDao()
 
-                parser = ArticleParser(object : ArticleParseListener {
+                articleDao.insertAll(
+                        *articles
+                                .filter {
+                                    !exists(it)
+                                }
+                                .toTypedArray())
 
-                    override fun onParsedAndFiltered(articles: List<Article>) {
-                        AsyncTask.execute {
-
-                            val articleDao = AppDatabase
-                                    .getInstance(context)
-                                    .articleDao()
-
-                            articleDao.insertAll(
-                                    *articles
-                                            .filter {
-                                                !exists(it)
-                                            }
-                                            .toTypedArray())
-
-                            sources.forEach {
-                                Prefs.updateRefreshTime(context, it)
-                            }
-                        }
-                        articlesLiveData.postValue(ArticleResult(false, articles))
-                    }
-
-                    override fun onParseFinished() {
-                        articlesLiveData.postValue(ArticleResult(true, emptyList()))
-                    }
-                }, rssService, this)
-
-                parser?.parse(sources)
-            } else {
-                postDatabaseArticles(articlesLiveData, sources, true)
+                sources.forEach {
+                    Prefs.updateRefreshTime(context, it)
+                }
             }
 
-        }
-        return articlesLiveData
+            override fun onParseFinished() {
+                val localIntent = Intent(ArticleFragment.INTENT_ACTION_REFRESHED)
+                LocalBroadcastManager.getInstance(context).sendBroadcast(localIntent)
+            }
+        }, rssService, this)
+
+        parser?.parse(sources)
     }
+
 
     fun exists(it: Article): Boolean {
         val articleDao = AppDatabase
@@ -85,18 +69,5 @@ class ArticleRepository(private val context: Context,
                 (!it.title.isNullOrEmpty() && articleDao.sameTitleCount(it.title) > 0L)
                 ||
                 articleDao.sameLinkCount(it.link) > 0L
-    }
-
-    private fun postDatabaseArticles(articles: MutableLiveData<ArticleResult>,
-                                     sources: List<ArticleSource>,
-                                     refreshFinished: Boolean) {
-        articles.postValue(
-                ArticleResult(
-                        refreshFinished,
-                        AppDatabase
-                                .getInstance(context)
-                                .articleDao()
-                                .findBySources(sources.map { it.name }))
-        )
     }
 }
