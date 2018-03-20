@@ -1,6 +1,5 @@
 package fr.gerdev.unicornNews.repository
 
-import android.arch.lifecycle.LiveData
 import android.content.Context
 import android.content.Intent
 import android.support.v4.content.LocalBroadcastManager
@@ -14,15 +13,13 @@ import fr.gerdev.unicornNews.rest.RssService
 import fr.gerdev.unicornNews.util.Prefs
 import timber.log.Timber
 
-data class ArticleResult(val refreshFinished: Boolean, val articles: List<Article>)
-
 class ArticleRepository(private val context: Context,
                         private val rssService: RssService) {
 
     private var parser: ArticleParser? = null
 
-    fun readStoredArticles(sources: List<ArticleSource>): LiveData<List<Article>> {
-        return AppDatabase.getInstance(context).articleDao().asLiveDataBySource(sources.map { it.name })
+    fun readStoredArticles(sources: List<ArticleSource>): List<Article> {
+        return AppDatabase.getInstance(context).articleDao().getBySources(sources.map { it.name })
     }
 
     fun updateArticles(sources: List<ArticleSource>) {

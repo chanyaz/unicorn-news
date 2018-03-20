@@ -1,6 +1,5 @@
 package fr.gerdev.unicornNews.database
 
-import android.arch.lifecycle.LiveData
 import android.arch.persistence.room.Dao
 import android.arch.persistence.room.Delete
 import android.arch.persistence.room.Insert
@@ -17,7 +16,7 @@ interface ArticleDao {
     fun loadAllByIds(articleIds: IntArray): List<Article>
 
     @Query("SELECT * FROM article WHERE source IN (:arg0) ORDER BY downloadDate desc")
-    fun asLiveDataBySource(sourceNames: List<String>): LiveData<List<Article>>
+    fun getBySources(sourceNames: List<String>): List<Article>
 
     @Query("SELECT COUNT(id) FROM article WHERE title  = (:arg0)")
     fun sameTitleCount(title: String?): Long

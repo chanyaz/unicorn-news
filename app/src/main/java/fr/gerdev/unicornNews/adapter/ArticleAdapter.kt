@@ -17,7 +17,7 @@ import fr.gerdev.unicornNews.util.DateUtil
 import kotlinx.android.synthetic.main.article_item_row.view.*
 
 
-class ArticleAdapter(private val context: Context, private val articles: Set<Article>)
+class ArticleAdapter(private val context: Context, private val articles: List<Article>)
     : RecyclerView.Adapter<ArticleAdapter.ArticlesVH>() {
 
     class ArticlesVH(private val context: Context, v: View) : RecyclerView.ViewHolder(v), View.OnClickListener {
@@ -41,6 +41,8 @@ class ArticleAdapter(private val context: Context, private val articles: Set<Art
 
                 Picasso.with(context)
                         .load(article.image)
+                        .fit()
+                        .centerCrop()
                         .into(view.articleImage)
 
 
