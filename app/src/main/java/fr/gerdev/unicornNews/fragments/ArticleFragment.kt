@@ -40,9 +40,8 @@ class ArticleFragment : Fragment() {
     private lateinit var device: ArticleDevice
 
     companion object {
-        const val INTENT_ACTION_REFRESHED = "intent_action_refreshed"
-
-        const val INTENT_ACTION_REFRESH = "intent_action_refresh"
+        const val INTENT_ACTION_DATA_FETCHED = "intent_action_refreshed"
+        const val INTENT_ACTION_SWIPE_REFRESHED = "intent_action_refresh"
         const val EXTRA_CATEGORY = "extra_category"
 
         private const val EXTRA_DEVICE = "extra_device"
@@ -54,7 +53,6 @@ class ArticleFragment : Fragment() {
             fragment.arguments = args
             return fragment
         }
-
     }
 
     override fun onAttach(context: Context?) {
@@ -79,11 +77,11 @@ class ArticleFragment : Fragment() {
         receiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent) {
                 when (intent.action) {
-                    INTENT_ACTION_REFRESH -> {
+                    INTENT_ACTION_SWIPE_REFRESHED -> {
                         category = ArticleCategory.valueOf(intent.getStringExtra(EXTRA_CATEGORY))
                         getArticles(true)
                     }
-                    INTENT_ACTION_REFRESHED -> refreshFinished()
+                    INTENT_ACTION_DATA_FETCHED -> refreshFinished()
                 }
             }
         }
@@ -92,8 +90,8 @@ class ArticleFragment : Fragment() {
     override fun onResume() {
         super.onResume()
         val filter = IntentFilter()
-        filter.addAction(INTENT_ACTION_REFRESHED)
-        filter.addAction(INTENT_ACTION_REFRESH)
+        filter.addAction(INTENT_ACTION_DATA_FETCHED)
+        filter.addAction(INTENT_ACTION_SWIPE_REFRESHED)
         LocalBroadcastManager.getInstance(context!!).registerReceiver(receiver, filter)
         getArticles()
     }
@@ -155,7 +153,6 @@ class ArticleFragment : Fragment() {
 
     private fun refreshFinished() {
         swipeRefresh.isRefreshing = false
-
     }
 
     interface Listener

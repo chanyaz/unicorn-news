@@ -3,10 +3,7 @@ package fr.gerdev.unicornNews.model
 import android.arch.lifecycle.LiveData
 import android.content.Context
 import fr.gerdev.unicornNews.repository.ArticleRepository
-import fr.gerdev.unicornNews.rest.RssService
 import fr.gerdev.unicornNews.util.Prefs
-import me.toptas.rssconverter.RssConverterFactory
-import retrofit2.Retrofit
 import timber.log.Timber
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -18,11 +15,6 @@ class ArticleLiveData(private val category: ArticleCategory,
     private lateinit var articleRepository: ArticleRepository
 
     private lateinit var executor: ExecutorService
-    private var rssService: RssService = Retrofit.Builder()
-            .baseUrl("http://www.toPreventRunTimeException.com")
-            .addConverterFactory(RssConverterFactory.create())
-            .build()
-            .create(RssService::class.java)
 
     override fun onInactive() {
         Timber.i("ArticleLiveData ${category.name} ${device.name} ${forceRefresh}on inactive, shut down executor now.")
@@ -31,7 +23,7 @@ class ArticleLiveData(private val category: ArticleCategory,
     }
 
     override fun onActive() {
-        articleRepository = ArticleRepository(context, rssService)
+        articleRepository = ArticleRepository(context)
 
         executor = Executors.newSingleThreadExecutor()
         executor.execute(ArticleLoader(filterSources(category, device)))

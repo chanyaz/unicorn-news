@@ -14,6 +14,7 @@ import fr.gerdev.unicornNews.R
 import fr.gerdev.unicornNews.adapter.ArticleFragmentPagerAdapter
 import fr.gerdev.unicornNews.fragments.ArticleFragment
 import fr.gerdev.unicornNews.model.ArticleCategory
+import fr.gerdev.unicornNews.service.RefreshService
 import kotlinx.android.synthetic.main.activity_tab_news.*
 
 
@@ -79,7 +80,7 @@ class TabNewsActivity : AppCompatActivity(), ArticleFragment.Listener, ArticleFr
                     ?: 0
             category = ArticleCategory.values()[indexCategory]
 
-            refresh()
+            broadcastRefresh()
 
             //restart hide timer of bottom bar
             showBottomSheet(true)
@@ -105,13 +106,14 @@ class TabNewsActivity : AppCompatActivity(), ArticleFragment.Listener, ArticleFr
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
         if (item?.itemId == R.id.menu_refresh) {
-            refresh()
+            RefreshService.refreshAllSources(this)
+            broadcastRefresh()
         }
         return true
     }
 
-    private fun refresh() {
-        val localIntent = Intent(ArticleFragment.INTENT_ACTION_REFRESH)
+    private fun broadcastRefresh() {
+        val localIntent = Intent(ArticleFragment.INTENT_ACTION_SWIPE_REFRESHED)
         localIntent.putExtra(ArticleFragment.EXTRA_CATEGORY, category.name)
         LocalBroadcastManager.getInstance(this).sendBroadcast(localIntent)
     }

@@ -11,12 +11,18 @@ import fr.gerdev.unicornNews.model.ArticleParser
 import fr.gerdev.unicornNews.model.ArticleSource
 import fr.gerdev.unicornNews.rest.RssService
 import fr.gerdev.unicornNews.util.Prefs
+import me.toptas.rssconverter.RssConverterFactory
+import retrofit2.Retrofit
 import timber.log.Timber
 
-class ArticleRepository(private val context: Context,
-                        private val rssService: RssService) {
+class ArticleRepository(private val context: Context) {
 
     private var parser: ArticleParser? = null
+    private var rssService: RssService = Retrofit.Builder()
+            .baseUrl("http://www.toPreventRunTimeException.com")
+            .addConverterFactory(RssConverterFactory.create())
+            .build()
+            .create(RssService::class.java)
 
     fun readStoredArticles(sources: List<ArticleSource>): List<Article> {
         return AppDatabase.getInstance(context).articleDao().getBySources(sources.map { it.name })
@@ -47,7 +53,7 @@ class ArticleRepository(private val context: Context,
             }
 
             override fun onParseFinished() {
-                val localIntent = Intent(ArticleFragment.INTENT_ACTION_REFRESHED)
+                val localIntent = Intent(ArticleFragment.INTENT_ACTION_DATA_FETCHED)
                 LocalBroadcastManager.getInstance(context).sendBroadcast(localIntent)
             }
         }, rssService, this)
@@ -55,6 +61,9 @@ class ArticleRepository(private val context: Context,
         parser?.parse(sources)
     }
 
+    fun updateAllArticles() {
+        updateArticles(ArticleSource.values().toList())
+    }
 
     fun exists(it: Article): Boolean {
         val articleDao = AppDatabase
