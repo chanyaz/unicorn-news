@@ -10,6 +10,7 @@ import android.content.IntentFilter
 import android.graphics.Color
 import android.os.Bundle
 import android.support.annotation.ColorRes
+import android.support.design.widget.Snackbar
 import android.support.v4.app.Fragment
 import android.support.v4.content.ContextCompat
 import android.support.v4.content.LocalBroadcastManager
@@ -23,6 +24,8 @@ import fr.gerdev.unicornNews.adapter.ArticleAdapter
 import fr.gerdev.unicornNews.model.Article
 import fr.gerdev.unicornNews.model.ArticleCategory
 import fr.gerdev.unicornNews.model.ArticleDevice
+import fr.gerdev.unicornNews.model.ArticleSource
+import fr.gerdev.unicornNews.repository.ArticleRepository
 import kotlinx.android.synthetic.main.fragment_article.*
 import java.util.*
 
@@ -40,7 +43,6 @@ class ArticleFragment : Fragment() {
     private lateinit var device: ArticleDevice
 
     companion object {
-        const val INTENT_ACTION_DATA_FETCHED = "intent_action_refreshed"
         const val INTENT_ACTION_SWIPE_REFRESHED = "intent_action_refresh"
         const val EXTRA_CATEGORY = "extra_category"
 
@@ -81,7 +83,17 @@ class ArticleFragment : Fragment() {
                         category = ArticleCategory.valueOf(intent.getStringExtra(EXTRA_CATEGORY))
                         getArticles(true)
                     }
-                    INTENT_ACTION_DATA_FETCHED -> refreshFinished()
+                    ArticleRepository.INTENT_ACTION_DATA_FETCHED -> {
+                        snackbarIfAllSourceRefreshed(intent.getIntExtra(ArticleRepository.EXTRA_REFRESHED_SOURCES_COUNT, 0))
+                        refreshFinished()
+                    }
+                }
+            }
+
+            private fun snackbarIfAllSourceRefreshed(sourceCount: Int) {
+                if (sourceCount == ArticleSource.values().size) {
+                    Snackbar.make(activity?.findViewById(android.R.id.content)!!
+                            , getString(R.string.all_sources_refreshed), Snackbar.LENGTH_LONG).show()
                 }
             }
         }
@@ -90,7 +102,7 @@ class ArticleFragment : Fragment() {
     override fun onResume() {
         super.onResume()
         val filter = IntentFilter()
-        filter.addAction(INTENT_ACTION_DATA_FETCHED)
+        filter.addAction(ArticleRepository.INTENT_ACTION_DATA_FETCHED)
         filter.addAction(INTENT_ACTION_SWIPE_REFRESHED)
         LocalBroadcastManager.getInstance(context!!).registerReceiver(receiver, filter)
         getArticles()

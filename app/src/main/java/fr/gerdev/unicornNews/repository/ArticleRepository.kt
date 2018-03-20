@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.Intent
 import android.support.v4.content.LocalBroadcastManager
 import fr.gerdev.unicornNews.database.AppDatabase
-import fr.gerdev.unicornNews.fragments.ArticleFragment
 import fr.gerdev.unicornNews.model.Article
 import fr.gerdev.unicornNews.model.ArticleParseListener
 import fr.gerdev.unicornNews.model.ArticleParser
@@ -16,6 +15,11 @@ import retrofit2.Retrofit
 import timber.log.Timber
 
 class ArticleRepository(private val context: Context) {
+
+    companion object {
+        const val INTENT_ACTION_DATA_FETCHED = "intent_action_refreshed"
+        const val EXTRA_REFRESHED_SOURCES_COUNT: String = "extra_refreshed_sources_count"
+    }
 
     private var parser: ArticleParser? = null
     private var rssService: RssService = Retrofit.Builder()
@@ -52,8 +56,9 @@ class ArticleRepository(private val context: Context) {
                 }
             }
 
-            override fun onParseFinished() {
-                val localIntent = Intent(ArticleFragment.INTENT_ACTION_DATA_FETCHED)
+            override fun onParseFinished(sourcesCount: Int) {
+                val localIntent = Intent(INTENT_ACTION_DATA_FETCHED)
+                localIntent.putExtra(EXTRA_REFRESHED_SOURCES_COUNT, sourcesCount)
                 LocalBroadcastManager.getInstance(context).sendBroadcast(localIntent)
             }
         }, rssService, this)

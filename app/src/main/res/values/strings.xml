@@ -5,9 +5,8 @@
     <string name="tests">Tests</string>
     <string name="videos">Vidéos</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="no_article">Aucun article</string>
     <string name="menu_refresh">Rafraîchir</string>
     <string name="article_photo">article photo</string>
+    <string name="all_sources_refreshed">Toutes les sources ont été rafraichies</string>
 </resources>
