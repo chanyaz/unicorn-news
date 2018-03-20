@@ -11,13 +11,8 @@ import fr.gerdev.unicornNews.model.ArticleLiveData
 
 class TabNewsVM(private val app: Application) : AndroidViewModel(app) {
 
-    fun getArticles(category: ArticleCategory, device: ArticleDevice): LiveData<List<Article>> {
-        return ArticleLiveData(category, device, app, false)
-    }
-
-    fun getRefreshedArticles(category: ArticleCategory, device: ArticleDevice): LiveData<List<Article>> {
-
-        return ArticleLiveData(category, device, app, true)
+    fun getArticles(category: ArticleCategory, device: ArticleDevice, forceRefresh: Boolean): LiveData<List<Article>> {
+        return ArticleLiveData(category, device, app, forceRefresh)
     }
 }
 

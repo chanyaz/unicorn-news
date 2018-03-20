@@ -34,10 +34,7 @@ class ArticleParser(private var listener: ArticleParseListener,
             executor.invokeAll(restCallables, READ_RSS_SOURCE_TIMEOUT, TimeUnit.MILLISECONDS)
             listener.onParseFinished()
         } catch (e: InterruptedException) {
-
-        } catch (e: Exception) {
-            Timber.e("Exception while performing future calls")
-            Timber.e(e)
+            shutdownExecutor()
         }
     }
 

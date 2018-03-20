@@ -25,7 +25,7 @@ class ArticleRepository(private val context: Context,
     fun updateArticles(sources: List<ArticleSource>) {
         Timber.i("${sources.size} source(s) to refresh")
 
-        parser?.stopParse()
+        stopParse()
         parser = ArticleParser(object : ArticleParseListener {
 
             override fun onParsedAndFiltered(articles: List<Article>) {
@@ -66,5 +66,9 @@ class ArticleRepository(private val context: Context,
                 (!it.title.isNullOrEmpty() && articleDao.sameTitleCount(it.title) > 0L)
                 ||
                 articleDao.sameLinkCount(it.link) > 0L
+    }
+
+    fun stopParse() {
+        parser?.stopParse()
     }
 }

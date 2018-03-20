@@ -85,11 +85,8 @@ class ArticleFragment : Fragment() {
                     }
                     INTENT_ACTION_REFRESHED -> refreshFinished()
                 }
-
             }
         }
-
-        getArticles()
     }
 
     override fun onResume() {
@@ -98,6 +95,7 @@ class ArticleFragment : Fragment() {
         filter.addAction(INTENT_ACTION_REFRESHED)
         filter.addAction(INTENT_ACTION_REFRESH)
         LocalBroadcastManager.getInstance(context!!).registerReceiver(receiver, filter)
+        getArticles()
     }
 
     override fun onPause() {
@@ -106,11 +104,12 @@ class ArticleFragment : Fragment() {
     }
 
     private fun getArticles(forceRefresh: Boolean = false) {
+        swipeRefresh?.isRefreshing = true
+
         articles.clear()
         adapter?.notifyDataSetChanged()
         articleLiveData?.removeObservers(this)
-        articleLiveData = if (forceRefresh) vm.getArticles(category, device) else vm.getRefreshedArticles(category, device)
-        swipeRefresh?.isRefreshing = forceRefresh
+        articleLiveData = vm.getArticles(category, device, forceRefresh)
         articleLiveData?.observe(this, Observer<List<Article>> { result ->
             onArticlesReaded(result!!)
         })

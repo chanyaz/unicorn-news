@@ -11,14 +11,13 @@ import timber.log.Timber
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
-// ger 14/03/18
-
 class ArticleLiveData(private val category: ArticleCategory,
                       private val device: ArticleDevice,
                       private val context: Context, private val forceRefresh: Boolean) : LiveData<List<Article>>() {
 
-    private var executor: ExecutorService = Executors.newSingleThreadExecutor()
     private lateinit var articleRepository: ArticleRepository
+
+    private lateinit var executor: ExecutorService
     private var rssService: RssService = Retrofit.Builder()
             .baseUrl("http://www.toPreventRunTimeException.com")
             .addConverterFactory(RssConverterFactory.create())
@@ -26,13 +25,16 @@ class ArticleLiveData(private val category: ArticleCategory,
             .create(RssService::class.java)
 
     override fun onInactive() {
-        Timber.e("ArticleLiveData on inactive, shut down executor now.")
+        Timber.i("ArticleLiveData ${category.name} ${device.name} ${forceRefresh}on inactive, shut down executor now.")
         executor.shutdownNow()
+        articleRepository.stopParse()
     }
 
     override fun onActive() {
-        val sources = filterSources(category, device)
-        executor.execute(ArticleLoader(sources))
+        articleRepository = ArticleRepository(context, rssService)
+
+        executor = Executors.newSingleThreadExecutor()
+        executor.execute(ArticleLoader(filterSources(category, device)))
     }
 
     private fun filterSources(category: ArticleCategory, device: ArticleDevice): List<ArticleSource> {
@@ -47,8 +49,7 @@ class ArticleLiveData(private val category: ArticleCategory,
                 else articleRepository.updateArticles(sources.filter {
                     Prefs.shouldRefresh(context, it)
                 })
-                postValue(ArticleRepository(context, rssService)
-                        .readStoredArticles(filterSources(category, device)))
+                postValue(articleRepository.readStoredArticles(filterSources(category, device)))
             } catch (e: InterruptedException) {
                 Timber.e("ArticleLoader with ${sources.joinToString(" ")} interrupted")
             }

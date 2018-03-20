@@ -59,7 +59,7 @@
                     <ImageView
                         android:id="@+id/articleImage"
                         android:layout_width="match_parent"
-                        android:layout_height="200dp"
+                        android:layout_height="96dp"
                         android:background="@color/colorPrimaryLight"
                         android:contentDescription="@string/article_photo"
                         android:scaleType="centerCrop"
@@ -71,7 +71,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    app:layout_constraintGuide_percent="0.55" />
+                    app:layout_constraintGuide_percent="0.60" />
 
             </android.support.constraint.ConstraintLayout>
 
