@@ -1,9 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/search"
+        android:icon="@drawable/ic_search"
+        android:title="@string/search_title"
+        app:actionViewClass="android.widget.SearchView"
+        app:showAsAction="collapseActionView|always" />
+
+
     <item
         android:id="@+id/menu_refresh"
-        app:showAsAction="always"
         android:icon="@drawable/ic_autorenew_white_24px"
-        android:title="@string/menu_refresh"/>
+        android:title="@string/menu_refresh"
+        app:showAsAction="always" />
 </menu>

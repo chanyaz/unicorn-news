@@ -3,6 +3,7 @@ package fr.gerdev.unicornNews.activity.tabNews
 import android.content.Intent
 import android.os.Bundle
 import android.os.CountDownTimer
+import android.support.design.widget.AppBarLayout
 import android.support.design.widget.BottomNavigationView
 import android.support.design.widget.BottomSheetBehavior
 import android.support.v4.content.LocalBroadcastManager
@@ -10,15 +11,20 @@ import android.support.v4.view.ViewPager
 import android.support.v7.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
+import android.widget.SearchView
 import fr.gerdev.unicornNews.R
 import fr.gerdev.unicornNews.adapter.ArticleFragmentPagerAdapter
+import fr.gerdev.unicornNews.adapter.MonoFragmentPagerAdapter
 import fr.gerdev.unicornNews.fragments.ArticleFragment
+import fr.gerdev.unicornNews.fragments.BaseArticleFragment
 import fr.gerdev.unicornNews.model.ArticleCategory
 import fr.gerdev.unicornNews.service.RefreshService
 import kotlinx.android.synthetic.main.activity_tab_news.*
+import timber.log.Timber
 
 
-class TabNewsActivity : AppCompatActivity(), ArticleFragment.Listener, ArticleFragmentPagerAdapter.CategoryProvider {
+class TabNewsActivity : AppCompatActivity(), BaseArticleFragment.Listener, ArticleFragmentPagerAdapter.CategoryProvider {
 
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<BottomNavigationView>
     private lateinit var category: ArticleCategory
@@ -32,6 +38,7 @@ class TabNewsActivity : AppCompatActivity(), ArticleFragment.Listener, ArticleFr
         }
     }
     private var verticalAppbarOffset = 0
+    private var bottomSheetShowable = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,7 +49,7 @@ class TabNewsActivity : AppCompatActivity(), ArticleFragment.Listener, ArticleFr
         category = ArticleCategory.GENERAL
         bottomSheetBehavior = BottomSheetBehavior.from(bottomNavigation)
 
-        viewPager.adapter = ArticleFragmentPagerAdapter(this, supportFragmentManager)
+        setPagerAdapter()
         tabLayout.setViewPager(viewPager)
         tabLayout.setOnPageChangeListener(object : ViewPager.OnPageChangeListener {
             override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {
@@ -58,6 +65,10 @@ class TabNewsActivity : AppCompatActivity(), ArticleFragment.Listener, ArticleFr
 
         setupAppBar()
         setupBottomMenu()
+    }
+
+    private fun setPagerAdapter() {
+        viewPager.adapter = ArticleFragmentPagerAdapter(this, supportFragmentManager)
     }
 
     private fun setupAppBar() {
@@ -92,15 +103,73 @@ class TabNewsActivity : AppCompatActivity(), ArticleFragment.Listener, ArticleFr
     }
 
     private fun showBottomSheet(show: Boolean) {
-        if (show) {
+        if (show && bottomSheetShowable) {
             bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
             countDown.cancel()
             countDown.start()
         } else bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
     }
 
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.tab_news_menu, menu)
+
+        val refreshItem = menu.findItem(R.id.menu_refresh)
+
+        val actionSearchItem = menu.findItem(R.id.search)
+        val searchView = actionSearchItem.actionView as SearchView
+        actionSearchItem.setOnActionExpandListener(object : MenuItem.OnActionExpandListener {
+            override fun onMenuItemActionExpand(item: MenuItem?): Boolean {
+                refreshItem?.isVisible = false
+                searchView.requestFocus()
+                val params = my_toolbar.layoutParams as AppBarLayout.LayoutParams
+                params.scrollFlags = 0
+
+                bottomSheetShowable = false
+                showBottomSheet(false)
+
+                tabLayout.visibility = View.GONE
+
+                viewPager.adapter = MonoFragmentPagerAdapter(supportFragmentManager)
+                return true
+            }
+
+            override fun onMenuItemActionCollapse(item: MenuItem?): Boolean {
+                refreshItem?.isVisible = true
+                searchView.clearFocus()
+                searchView.setQuery("", false)
+                val params = my_toolbar.layoutParams as AppBarLayout.LayoutParams
+                params.scrollFlags =
+                        AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS or AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL
+
+                bottomSheetShowable = true
+
+                tabLayout.visibility = View.VISIBLE
+
+                setPagerAdapter()
+
+                return true
+            }
+        })
+        searchView.isIconified = false
+        searchView.setOnClickListener { Timber.e("on click listener") }
+        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String): Boolean {
+                searchView.clearFocus()
+                return true
+            }
+
+            override fun onQueryTextChange(newText: String): Boolean {
+                val adapter: MonoFragmentPagerAdapter = viewPager.adapter as MonoFragmentPagerAdapter
+                adapter.onNewQuery(newText)
+                return true
+            }
+        })
+        searchView.setOnSearchClickListener { refreshItem.isVisible = true }
+        searchView.setOnCloseListener {
+            actionSearchItem.collapseActionView()
+            true
+        }
+        searchView.queryHint = getString(R.string.search_hint)
         return true
     }
 
@@ -113,7 +182,7 @@ class TabNewsActivity : AppCompatActivity(), ArticleFragment.Listener, ArticleFr
     }
 
     private fun broadcastRefresh() {
-        val localIntent = Intent(ArticleFragment.INTENT_ACTION_SWIPE_REFRESHED)
+        val localIntent = Intent(BaseArticleFragment.INTENT_ACTION_REFRESH_DATA)
         localIntent.putExtra(ArticleFragment.EXTRA_CATEGORY, category.name)
         LocalBroadcastManager.getInstance(this).sendBroadcast(localIntent)
     }

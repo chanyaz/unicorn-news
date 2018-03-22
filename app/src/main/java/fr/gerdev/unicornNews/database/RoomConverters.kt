@@ -1,8 +1,6 @@
 package fr.gerdev.unicornNews.database
 
 import android.arch.persistence.room.TypeConverter
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import fr.gerdev.unicornNews.model.ArticleSource
 import org.joda.time.DateTime
 
@@ -11,7 +9,11 @@ import org.joda.time.DateTime
 class RoomConverters {
     @TypeConverter
     fun stringToArticleSource(articleSource: String?): ArticleSource? {
-        return ArticleSource.valueOf(articleSource ?: "")
+        return try {
+            ArticleSource.valueOf(articleSource ?: "")
+        } catch (e: Exception) {
+            null
+        }
     }
 
     @TypeConverter
@@ -27,19 +29,5 @@ class RoomConverters {
     @TypeConverter
     fun datetimeToString(dt: DateTime?): String? {
         return dt?.toString() ?: ""
-    }
-
-    @TypeConverter
-    fun stringtoList(value: String): List<String> {
-        val listType = object : TypeToken<List<String>>() {
-
-        }.type
-        return Gson().fromJson(value, listType)
-    }
-
-    @TypeConverter
-    fun ListToString(list: List<String>): String {
-        val gson = Gson()
-        return gson.toJson(list)
     }
 }

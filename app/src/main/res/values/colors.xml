@@ -5,7 +5,7 @@
     <color name="colorPrimaryDark">#29434e</color>
     <color name="colorPrimaryBackground">#c1d5e0</color>
 
-
+    <color name="imageArticleBackground">#fafafa</color>
 
     <color name="colorAccentLight">#fdff58</color>
     <color name="colorAccent">#c6ff00</color>

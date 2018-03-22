@@ -9,4 +9,8 @@
     <string name="menu_refresh">Rafraîchir</string>
     <string name="article_photo">article photo</string>
     <string name="all_sources_refreshed">Toutes les sources ont été rafraichies</string>
+    <string name="search_title">Rechercher un article</string>
+    <string name="search_hint">Titre, description …</string>
+    <string name="loading">Chargement</string>
+    <string name="enterSomething">Trouver un article</string>
 </resources>

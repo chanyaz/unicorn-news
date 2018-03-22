@@ -32,6 +32,18 @@ class ArticleRepository(private val context: Context) {
         return AppDatabase.getInstance(context).articleDao().getBySources(sources.map { it.name })
     }
 
+    fun searchArticles(query: String): List<Article> {
+        val words: List<String> = query.split(" ")
+        val articleDao = AppDatabase.getInstance(context).articleDao()
+        return when (words.size) {
+            0 -> articleDao.search()
+            1 -> articleDao.search("%" + words[0] + "%")
+            2 -> articleDao.search("%" + words[0] + "%", "%" + words[1] + "%")
+            3 -> articleDao.search("%" + words[0] + "%", "%" + words[1] + "%", "%" + words[2] + "%")
+            else -> articleDao.search("%" + words[0] + "%", "%" + words[1] + "%", "%" + words[2] + "%", "%" + words[3] + "%")
+        }
+    }
+
     fun updateArticles(sources: List<ArticleSource>) {
         Timber.i("${sources.size} source(s) to refresh")
 
@@ -45,20 +57,16 @@ class ArticleRepository(private val context: Context) {
                         .articleDao()
 
                 articleDao.insertAll(
-                        *articles
-                                .filter {
-                                    !exists(it)
-                                }
-                                .toTypedArray())
+                        *articles.toTypedArray())
 
                 sources.forEach {
                     Prefs.updateRefreshTime(context, it)
                 }
             }
 
-            override fun onParseFinished(sourcesCount: Int) {
+            override fun onParseFinished(refreshedSourcesCount: Int) {
                 val localIntent = Intent(INTENT_ACTION_DATA_FETCHED)
-                localIntent.putExtra(EXTRA_REFRESHED_SOURCES_COUNT, sourcesCount)
+                localIntent.putExtra(EXTRA_REFRESHED_SOURCES_COUNT, refreshedSourcesCount)
                 LocalBroadcastManager.getInstance(context).sendBroadcast(localIntent)
             }
         }, rssService, this)

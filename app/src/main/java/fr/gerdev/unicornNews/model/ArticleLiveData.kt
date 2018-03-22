@@ -17,7 +17,6 @@ class ArticleLiveData(private val category: ArticleCategory,
     private lateinit var executor: ExecutorService
 
     override fun onInactive() {
-        Timber.i("ArticleLiveData ${category.name} ${device.name} ${forceRefresh}on inactive, shut down executor now.")
         executor.shutdownNow()
         articleRepository.stopParse()
     }
@@ -43,7 +42,7 @@ class ArticleLiveData(private val category: ArticleCategory,
                 })
                 postValue(articleRepository.readStoredArticles(filterSources(category, device)))
             } catch (e: InterruptedException) {
-                Timber.e("ArticleLoader with ${sources.joinToString(" ")} interrupted")
+                Timber.e("ArticleSearchLoader with ${sources.joinToString(" ")} interrupted")
             }
         }
     }

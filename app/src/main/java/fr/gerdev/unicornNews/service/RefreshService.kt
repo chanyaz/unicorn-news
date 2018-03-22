@@ -21,7 +21,7 @@ class RefreshService : IntentService("RefreshService") {
     }
 
     companion object {
-        private val ACTION_REFRESH_ALL_SOURCES = "fr.gerdev.unicornNews.service.action.refresh_all_sources"
+        private const val ACTION_REFRESH_ALL_SOURCES = "fr.gerdev.unicornNews.service.action.refresh_all_sources"
 
         fun refreshAllSources(context: Context) {
             val intent = Intent(context, RefreshService::class.java)
