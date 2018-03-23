@@ -111,7 +111,13 @@ abstract class BaseArticleFragment : Fragment() {
         this.articles.clear()
         val previousSize = this.articles.size
         this.articles.addAll(articles.sortedByDescending { it.downloadDate })
-        adapter?.notifyItemRangeInserted(0, this.articles.size - previousSize)
+
+        //happens when backing to searchArticleFragment after clicking previously on article
+        // notifyItemRangeInserted must not notify 0, other wis there is run time exception
+        if (this.articles.size - previousSize != 0) {
+            adapter?.notifyItemRangeInserted(0, this.articles.size - previousSize)
+        }
+
         if (articles.isNotEmpty()) emptyMsg.visibility = View.GONE
         else emptyMsg.visibility = View.VISIBLE
     }
