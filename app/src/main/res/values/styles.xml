@@ -21,6 +21,11 @@
         <item name="android:textSize">12sp</item>
     </style>
 
+    <style name="LoadingText" parent="@android:style/TextAppearance.Medium">
+        <item name="android:textSize">26sp</item>
+        <item name="android:textColor">@color/colorPrimaryDark</item>
+    </style>
+
     <style name="ThemeOverlay.MyToolbar" parent="ThemeOverlay.AppCompat.Dark.ActionBar">
         <item name="actionMenuTextColor">@android:color/white</item>
     </style>

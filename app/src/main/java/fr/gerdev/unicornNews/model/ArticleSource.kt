@@ -250,14 +250,14 @@ enum class ArticleSource(val url: String, val category: ArticleCategory, val dev
             "xbox-gamer.fr"),
 
      //little bonus ;)
-     PODCAST_PORNDIG("https://www.porndig.com/rss/top/videos.xml",
-            ArticleCategory.VIDEO,
-            ArticleDevice.MOBILE,
-            "bonus"),
-    PODCAST_XVIDEOS("https://www.xvideos.com/rss/rss.xml",
-            ArticleCategory.VIDEO,
-            ArticleDevice.MOBILE,
-            "bonus"),
+//     PODCAST_PORNDIG("https://www.porndig.com/rss/top/videos.xml",
+//            ArticleCategory.VIDEO,
+//            ArticleDevice.MOBILE,
+//            "bonus"),
+//    PODCAST_XVIDEOS("https://www.xvideos.com/rss/rss.xml",
+//            ArticleCategory.VIDEO,
+//            ArticleDevice.MOBILE,
+//            "bonus"),
 }
 
 enum class ArticleCategory {

@@ -1,5 +1,6 @@
 package fr.gerdev.unicornNews.activity.tabNews
 
+import android.arch.lifecycle.ViewModelProviders
 import android.content.Intent
 import android.os.Bundle
 import android.os.CountDownTimer
@@ -19,7 +20,6 @@ import fr.gerdev.unicornNews.adapter.MonoFragmentPagerAdapter
 import fr.gerdev.unicornNews.fragments.ArticleFragment
 import fr.gerdev.unicornNews.fragments.BaseArticleFragment
 import fr.gerdev.unicornNews.model.ArticleCategory
-import fr.gerdev.unicornNews.service.RefreshService
 import kotlinx.android.synthetic.main.activity_tab_news.*
 import timber.log.Timber
 
@@ -175,7 +175,10 @@ class TabNewsActivity : AppCompatActivity(), BaseArticleFragment.Listener, Artic
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
         if (item?.itemId == R.id.menu_refresh) {
-            RefreshService.refreshAllSources(this)
+
+            val vm = ViewModelProviders.of(this).get(TabNewsVM::class.java)
+            vm.updateAllArticles()
+
             broadcastRefresh()
         }
         return true

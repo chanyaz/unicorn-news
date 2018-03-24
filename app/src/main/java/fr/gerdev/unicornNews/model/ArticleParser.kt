@@ -44,7 +44,8 @@ class ArticleParser(private var listener: ArticleParseListener,
     }
 
     override fun onArticleParsed(source: ArticleSource, articles: List<Article>) {
-        listener.onParsedAndFiltered(articles.filter { !articleRepository.exists(it) })
+        val filteredArticles = articles.filter { !articleRepository.exists(it) }
+        listener.onParsedAndFiltered(filteredArticles)
     }
 
     private fun shutdownExecutor() {

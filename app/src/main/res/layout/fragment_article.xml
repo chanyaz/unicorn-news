@@ -22,37 +22,36 @@
 
     </android.support.v4.widget.SwipeRefreshLayout>
 
-    <TextView
-        android:id="@+id/emptyMsg"
+    <FrameLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:paddingBottom="150dp"
-        android:text="@string/no_article"
-        android:textAppearance="@style/TextAppearance.AppCompat.Display1"
-        android:textColor="@color/colorPrimaryDark"
-        android:visibility="gone" />
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="76sp">
 
-    <TextView
-        android:id="@+id/loadingMsg"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:paddingBottom="150dp"
-        android:text="@string/loading"
-        android:textAppearance="@style/TextAppearance.AppCompat.Display1"
-        android:textColor="@color/colorPrimaryDark" />
+        <TextView
+            android:id="@+id/emptyMsg"
+            style="@style/LoadingText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/no_article"
+            android:visibility="gone" />
 
-    <TextView
-        android:id="@+id/enterSomething"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:paddingBottom="150dp"
-        android:text="@string/enterSomething"
-        android:textAppearance="@style/TextAppearance.AppCompat.Display1"
-        android:textColor="@color/colorPrimaryDark"
-        android:visibility="gone" />
+        <TextView
+            android:id="@+id/loadingMsg"
+            style="@style/LoadingText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/loading" />
+
+        <TextView
+            android:id="@+id/enterSomething"
+            style="@style/LoadingText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/enterSomething"
+            android:visibility="gone" />
+    </FrameLayout>
+
 
     <com.github.gmazzo.unicorn.UnicornView
         android:id="@+id/unicorn"

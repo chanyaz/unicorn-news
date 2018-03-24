@@ -62,8 +62,6 @@ abstract class BaseArticleFragment : Fragment() {
 
         loadingMsg.visibility = View.VISIBLE
         emptyMsg.visibility = View.GONE
-
-        articleLiveData?.removeObservers(this)
         articleLiveData = getLiveData(forceRefresh)
         articleLiveData?.observe(this, Observer<List<Article>> { result ->
             onArticlesReaded(result!!)
@@ -71,6 +69,7 @@ abstract class BaseArticleFragment : Fragment() {
     }
 
     protected fun clearArticles() {
+        articleLiveData?.removeObservers(this)
         articles.clear()
         adapter?.notifyDataSetChanged()
     }
@@ -108,8 +107,8 @@ abstract class BaseArticleFragment : Fragment() {
 
         loadingMsg.visibility = View.GONE
         unicoooooooornnnNews()
-        this.articles.clear()
         val previousSize = this.articles.size
+        this.articles.clear()
         this.articles.addAll(articles.sortedByDescending { it.downloadDate })
 
         //happens when backing to searchArticleFragment after clicking previously on article

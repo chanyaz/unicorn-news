@@ -53,9 +53,20 @@ class ArticleFragment : BaseArticleFragment() {
 
     override fun getLiveData(forceRefresh: Boolean): LiveData<List<Article>> = vm.getArticles(category, device, forceRefresh)
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        receiver = object : BroadcastReceiver() {
+    override fun onResume() {
+        super.onResume()
+        val filter = IntentFilter()
+
+        receiver = buildReceiver()
+
+        filter.addAction(ArticleRepository.INTENT_ACTION_DATA_FETCHED)
+        filter.addAction(INTENT_ACTION_REFRESH_DATA)
+        LocalBroadcastManager.getInstance(context!!).registerReceiver(receiver, filter)
+        getArticles()
+    }
+
+    private fun buildReceiver(): BroadcastReceiver {
+        return object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent) {
                 when (intent.action) {
                     INTENT_ACTION_REFRESH_DATA -> {
@@ -63,7 +74,9 @@ class ArticleFragment : BaseArticleFragment() {
                         getArticles(true)
                     }
                     ArticleRepository.INTENT_ACTION_DATA_FETCHED -> {
-                        snackbarIfAllSourceRefreshed(intent.getIntExtra(ArticleRepository.EXTRA_REFRESHED_SOURCES_COUNT, 0))
+
+                        val refreshedCount = intent.getIntExtra(ArticleRepository.EXTRA_REFRESHED_SOURCES_COUNT, 0)
+                        snackbarIfAllSourceRefreshed(refreshedCount)
                         refreshFinished()
                     }
                 }
@@ -76,15 +89,6 @@ class ArticleFragment : BaseArticleFragment() {
                 }
             }
         }
-    }
-
-    override fun onResume() {
-        super.onResume()
-        val filter = IntentFilter()
-        filter.addAction(ArticleRepository.INTENT_ACTION_DATA_FETCHED)
-        filter.addAction(INTENT_ACTION_REFRESH_DATA)
-        LocalBroadcastManager.getInstance(context!!).registerReceiver(receiver, filter)
-        getArticles()
     }
 
     override fun onPause() {

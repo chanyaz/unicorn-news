@@ -39,6 +39,8 @@ class SearchedArticleFragment : BaseArticleFragment() {
         } else {
             enterSomething.visibility = View.VISIBLE
             clearArticles()
+            loadingMsg.visibility = View.GONE
+            swipeRefresh.isRefreshing = false
         }
     }
 

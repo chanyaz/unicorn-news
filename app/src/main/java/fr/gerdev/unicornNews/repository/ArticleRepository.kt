@@ -2,6 +2,8 @@ package fr.gerdev.unicornNews.repository
 
 import android.content.Context
 import android.content.Intent
+import android.os.Handler
+import android.os.Looper
 import android.support.v4.content.LocalBroadcastManager
 import fr.gerdev.unicornNews.database.AppDatabase
 import fr.gerdev.unicornNews.model.Article
@@ -67,7 +69,11 @@ class ArticleRepository(private val context: Context) {
             override fun onParseFinished(refreshedSourcesCount: Int) {
                 val localIntent = Intent(INTENT_ACTION_DATA_FETCHED)
                 localIntent.putExtra(EXTRA_REFRESHED_SOURCES_COUNT, refreshedSourcesCount)
-                LocalBroadcastManager.getInstance(context).sendBroadcast(localIntent)
+
+                // broadcast on mainthread prevent possible multiple intent received
+                Handler(Looper.getMainLooper()).post {
+                    LocalBroadcastManager.getInstance(context).sendBroadcast(localIntent)
+                }
             }
         }, rssService, this)
 
@@ -78,17 +84,10 @@ class ArticleRepository(private val context: Context) {
         updateArticles(ArticleSource.values().toList())
     }
 
-    fun exists(it: Article): Boolean {
-        val articleDao = AppDatabase
-                .getInstance(context)
-                .articleDao()
-
-        return (!it.description.isNullOrEmpty() && articleDao.sameDescriptionCount(it.description) > 0L)
-                ||
-                (!it.title.isNullOrEmpty() && articleDao.sameTitleCount(it.title) > 0L)
-                ||
-                articleDao.sameLinkCount(it.link) > 0L
-    }
+    fun exists(it: Article): Boolean = AppDatabase
+            .getInstance(context)
+            .articleDao()
+            .exists(it.title, it.description, it.link)
 
     fun stopParse() {
         parser?.stopParse()

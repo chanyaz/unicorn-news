@@ -33,6 +33,9 @@ interface ArticleDao {
     @Query("SELECT COUNT(id) FROM article WHERE link  = (:arg0)")
     fun sameLinkCount(link: String?): Long
 
+    @Query("SELECT COUNT(id)!=0 FROM article where title like (:arg0) or description like (:arg1) or link like (:arg2)")
+    fun exists(title: String?, description: String?, link: String?): Boolean
+
     @Query("UPDATE article SET read = 1 WHERE link  = (:arg0)")
     fun setReaded(link: String)
 
