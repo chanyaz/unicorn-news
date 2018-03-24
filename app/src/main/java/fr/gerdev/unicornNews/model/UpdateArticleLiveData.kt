@@ -7,8 +7,7 @@ import timber.log.Timber
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
-class UpdateArticleLiveData(private val sources: List<ArticleSource>,
-                            private val context: Context) : LiveData<Boolean>() {
+class UpdateArticleLiveData(private val context: Context) : LiveData<Boolean>() {
 
     private lateinit var articleRepository: ArticleRepository
     private lateinit var executor: ExecutorService
@@ -22,16 +21,16 @@ class UpdateArticleLiveData(private val sources: List<ArticleSource>,
         articleRepository = ArticleRepository(context)
 
         executor = Executors.newSingleThreadExecutor()
-        executor.execute(ArticleLoader())
+        executor.execute(Loader())
     }
 
-    inner class ArticleLoader : Runnable {
+    inner class Loader : Runnable {
         override fun run() {
             try {
-                articleRepository.updateArticles(sources)
+                articleRepository.updateAllArticles()
                 postValue(true)
             } catch (e: InterruptedException) {
-                Timber.e("ArticleUpdateLoader with ${sources.joinToString(" ")} interrupted")
+                Timber.e("ArticleUpdateLoader with ${ArticleSource.values().toList().joinToString(" ")} interrupted")
             } catch (e: Exception) {
                 postValue(false)
             }

@@ -2,8 +2,6 @@ package fr.gerdev.unicornNews.repository
 
 import android.content.Context
 import android.content.Intent
-import android.os.Handler
-import android.os.Looper
 import android.support.v4.content.LocalBroadcastManager
 import fr.gerdev.unicornNews.database.AppDatabase
 import fr.gerdev.unicornNews.model.Article
@@ -69,11 +67,7 @@ class ArticleRepository(private val context: Context) {
             override fun onParseFinished(refreshedSourcesCount: Int) {
                 val localIntent = Intent(INTENT_ACTION_DATA_FETCHED)
                 localIntent.putExtra(EXTRA_REFRESHED_SOURCES_COUNT, refreshedSourcesCount)
-
-                // broadcast on mainthread prevent possible multiple intent received
-                Handler(Looper.getMainLooper()).post {
-                    LocalBroadcastManager.getInstance(context).sendBroadcast(localIntent)
-                }
+                LocalBroadcastManager.getInstance(context).sendBroadcast(localIntent)
             }
         }, rssService, this)
 

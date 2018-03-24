@@ -17,22 +17,22 @@ class ArticleLiveData(private val category: ArticleCategory,
     private lateinit var executor: ExecutorService
 
     override fun onInactive() {
-        executor.shutdownNow()
         articleRepository.stopParse()
+        executor.shutdownNow()
     }
 
     override fun onActive() {
         articleRepository = ArticleRepository(context)
 
         executor = Executors.newSingleThreadExecutor()
-        executor.execute(ArticleLoader(filterSources(category, device)))
+        executor.execute(Loader())
     }
 
     private fun filterSources(category: ArticleCategory, device: ArticleDevice): List<ArticleSource> {
         return ArticleSource.values().filter { it.category == category && it.device == device }
     }
 
-    inner class ArticleLoader(private val sources: List<ArticleSource>) : Runnable {
+    inner class Loader : Runnable {
         override fun run() {
             val sources = filterSources(category, device)
             try {

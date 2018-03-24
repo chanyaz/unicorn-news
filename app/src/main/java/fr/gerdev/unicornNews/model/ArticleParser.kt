@@ -16,7 +16,6 @@ class ArticleParser(private var listener: ArticleParseListener,
                     private val articleRepository: ArticleRepository) : AbstractParser, ParseRunnable.Listener {
     companion object {
         const val MAX_THREADS = 4
-        const val EXECUTOR_SHUTDOWN_TIMEOUT: Long = 1 * 1000
         const val READ_RSS_SOURCE_TIMEOUT: Long = 20 * 1000
     }
 
@@ -36,31 +35,18 @@ class ArticleParser(private var listener: ArticleParseListener,
         } catch (e: InterruptedException) {
         } catch (e: RejectedExecutionException) {
         } finally {
-            shutdownExecutor()
+            executor.shutdownNow()
         }
     }
 
     override fun stopParse() {
         Timber.w("stop article parsing")
-        shutdownExecutor()
+        executor.shutdownNow()
     }
 
     override fun onArticleParsed(source: ArticleSource, articles: List<Article>) {
         val filteredArticles = articles.filter { !articleRepository.exists(it) }
         listener.onParsedAndFiltered(filteredArticles)
-    }
-
-    private fun shutdownExecutor() {
-        //shutdown executor
-        executor.shutdown()
-        try {
-            executor.awaitTermination(EXECUTOR_SHUTDOWN_TIMEOUT, TimeUnit.MILLISECONDS)
-        } catch (e: InterruptedException) {
-        }
-        if (!executor.isShutdown) {
-            executor.shutdownNow()
-            Timber.e("Force killed executor")
-        }
     }
 }
 
@@ -72,28 +58,25 @@ class ParseRunnable(private val listener: Listener,
     override fun run() {
         try {
             val call: Call<RssFeed> = rssService.getRss(source.url)
+            val response = call.execute()
+            val body = response.body()
 
-            try {
-                val response = call.execute()
-
-                if (response.isSuccessful) {
-                    val rssFeed = response.body()
-                    val rssItems = rssFeed?.items
-                    if (rssItems == null || rssItems.isEmpty()) {
-                        Timber.w("RSS parse success but empty data ${source.url}")
-                    } else {
-                        Timber.i("Rss parse success : ${rssItems.size} articles ${source.url}")
-                        listener.onArticleParsed(source, rssItems.map { it.toArticleEntry(source) })
-                    }
-
+            if (response.isSuccessful) {
+                val rssItems = body?.items
+                if (rssItems == null || rssItems.isEmpty()) {
+                    Timber.w("RSS parse success but empty data ${source.url}")
                 } else {
-                    Timber.e("RSS server response error : ${source.url} ${response.body()}")
+                    Timber.i("Rss parse success : ${rssItems.size} articles ${source.url}")
+                    listener.onArticleParsed(source, rssItems.map { it.toArticleEntry(source) })
                 }
-            } catch (e: IOException) {
-                Timber.e("Rss Network failure ${source.url}")
+
+            } else {
+                Timber.e("RSS server response error : ${source.url} $body")
             }
+        } catch (e: IOException) {
+            Timber.e("Rss Network failure ${source.url}")
         } catch (e: InterruptedException) {
-            Timber.w("Rss parsing interrupted : ${source.url}")
+            Timber.w("Rss parsing interrupted : ${source.url} ")
         }
     }
 

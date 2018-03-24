@@ -17,7 +17,7 @@ class TabNewsVM(private val app: Application) : AndroidViewModel(app) {
     }
 
     fun updateAllArticles(): LiveData<Boolean> {
-        return UpdateArticleLiveData(ArticleSource.values().toList(), app)
+        return UpdateArticleLiveData(app)
     }
 }
 
