@@ -34,6 +34,8 @@ class ArticleParser(private var listener: ArticleParseListener,
             executor.invokeAll(restCallables, READ_RSS_SOURCE_TIMEOUT, TimeUnit.MILLISECONDS)
             listener.onParseFinished(sources.size)
         } catch (e: InterruptedException) {
+        } catch (e: RejectedExecutionException) {
+        } finally {
             shutdownExecutor()
         }
     }

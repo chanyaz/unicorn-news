@@ -1,5 +1,7 @@
 package fr.gerdev.unicornNews.activity.tabNews
 
+import android.arch.lifecycle.LiveData
+import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
 import android.content.Intent
 import android.os.Bundle
@@ -7,6 +9,7 @@ import android.os.CountDownTimer
 import android.support.design.widget.AppBarLayout
 import android.support.design.widget.BottomNavigationView
 import android.support.design.widget.BottomSheetBehavior
+import android.support.design.widget.Snackbar
 import android.support.v4.content.LocalBroadcastManager
 import android.support.v4.view.ViewPager
 import android.support.v7.app.AppCompatActivity
@@ -40,6 +43,8 @@ class TabNewsActivity : AppCompatActivity(), BaseArticleFragment.Listener, Artic
     private var verticalAppbarOffset = 0
     private var bottomSheetShowable = true
 
+    private var updateLiveData: LiveData<Boolean>? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_tab_news)
@@ -65,6 +70,11 @@ class TabNewsActivity : AppCompatActivity(), BaseArticleFragment.Listener, Artic
 
         setupAppBar()
         setupBottomMenu()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        updateLiveData?.removeObservers(this)
     }
 
     private fun setPagerAdapter() {
@@ -177,7 +187,12 @@ class TabNewsActivity : AppCompatActivity(), BaseArticleFragment.Listener, Artic
         if (item?.itemId == R.id.menu_refresh) {
 
             val vm = ViewModelProviders.of(this).get(TabNewsVM::class.java)
-            vm.updateAllArticles()
+            updateLiveData?.removeObservers(this)
+            updateLiveData = vm.updateAllArticles()
+            updateLiveData?.observe(this, Observer<Boolean> { success ->
+                Snackbar.make(findViewById(android.R.id.content)!!
+                        , getString(R.string.all_sources_refreshed), Snackbar.LENGTH_LONG).show()
+            })
 
             broadcastRefresh()
         }

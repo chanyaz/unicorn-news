@@ -34,6 +34,7 @@ class ArticleLiveData(private val category: ArticleCategory,
 
     inner class ArticleLoader(private val sources: List<ArticleSource>) : Runnable {
         override fun run() {
+            val sources = filterSources(category, device)
             try {
                 if (forceRefresh)
                     articleRepository.updateArticles(sources)
