@@ -18,7 +18,6 @@ class ArticleRepository(private val context: Context) {
 
     companion object {
         const val INTENT_ACTION_DATA_FETCHED = "intent_action_refreshed"
-        const val EXTRA_REFRESHED_SOURCES_COUNT: String = "extra_refreshed_sources_count"
     }
 
     private var parser: ArticleParser? = null
@@ -66,7 +65,7 @@ class ArticleRepository(private val context: Context) {
 
             override fun onParseFinished(refreshedSourcesCount: Int) {
                 val localIntent = Intent(INTENT_ACTION_DATA_FETCHED)
-                localIntent.putExtra(EXTRA_REFRESHED_SOURCES_COUNT, refreshedSourcesCount)
+                //TODO ADD CATEGORY AND DEVICE, OR SPECIFY ALL SOURCE LOADED
                 LocalBroadcastManager.getInstance(context).sendBroadcast(localIntent)
             }
         }, rssService, this)

@@ -6,7 +6,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.os.Bundle
-import android.support.design.widget.Snackbar
 import android.support.v4.content.LocalBroadcastManager
 import android.view.LayoutInflater
 import android.view.View
@@ -15,7 +14,6 @@ import fr.gerdev.unicornNews.R
 import fr.gerdev.unicornNews.model.Article
 import fr.gerdev.unicornNews.model.ArticleCategory
 import fr.gerdev.unicornNews.model.ArticleDevice
-import fr.gerdev.unicornNews.model.ArticleSource
 import fr.gerdev.unicornNews.repository.ArticleRepository
 import kotlinx.android.synthetic.main.fragment_article.*
 
@@ -72,20 +70,10 @@ class ArticleFragment : BaseArticleFragment() {
                     INTENT_ACTION_REFRESH_DATA -> {
                         parseIntentActionRefreshDataExtras(intent)
                         getArticles(true)
-                    }
-                    ArticleRepository.INTENT_ACTION_DATA_FETCHED -> {
 
-                        val refreshedCount = intent.getIntExtra(ArticleRepository.EXTRA_REFRESHED_SOURCES_COUNT, 0)
-                        snackbarIfAllSourceRefreshed(refreshedCount)
-                        refreshFinished()
+                        //TODO CHECK CATEGORY AND DEVICE CORRESPOND TO THIS FRAGMENT TO STOP REFRESH
+                        swipeRefresh.isRefreshing = false
                     }
-                }
-            }
-
-            private fun snackbarIfAllSourceRefreshed(sourceCount: Int) {
-                if (sourceCount == ArticleSource.values().size) {
-                    Snackbar.make(activity?.findViewById(android.R.id.content)!!
-                            , getString(R.string.all_sources_refreshed), Snackbar.LENGTH_LONG).show()
                 }
             }
         }
@@ -94,10 +82,6 @@ class ArticleFragment : BaseArticleFragment() {
     override fun onPause() {
         super.onPause()
         LocalBroadcastManager.getInstance(context!!).unregisterReceiver(receiver)
-    }
-
-    private fun refreshFinished() {
-        swipeRefresh.isRefreshing = false
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
