@@ -3,7 +3,6 @@ package fr.gerdev.unicornNews.model
 import android.arch.lifecycle.LiveData
 import android.content.Context
 import android.content.Intent
-import android.os.AsyncTask
 import android.support.v4.content.LocalBroadcastManager
 import fr.gerdev.unicornNews.fragments.ArticleFragment
 import fr.gerdev.unicornNews.repository.ArticleRepository
@@ -21,11 +20,14 @@ class CategoryDeviceLiveData(private var category: ArticleCategory,
     private val parser = CategoryDeviceParser(category, device, forceRefresh, context, this)
 
     override fun onInactive() {
+
         //for parser part
         parser.stopParse()
 
         //for bdd part
         executor.shutdownNow()
+
+        value = emptyList()
     }
 
     override fun onActive() {
@@ -34,7 +36,7 @@ class CategoryDeviceLiveData(private var category: ArticleCategory,
         executor = Executors.newSingleThreadExecutor()
         executor.execute((Loader()))
 
-        AsyncTask.execute { parser.parse() }
+        parser.parse()
     }
 
     override fun onParsed(articles: List<Article>) {

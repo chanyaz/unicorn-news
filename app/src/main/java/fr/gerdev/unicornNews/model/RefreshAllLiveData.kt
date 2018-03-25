@@ -2,7 +2,6 @@ package fr.gerdev.unicornNews.model
 
 import android.arch.lifecycle.LiveData
 import android.content.Context
-import android.os.AsyncTask
 
 class RefreshAllLiveData(context: Context) : LiveData<List<Article>>()
         , ArticleParseListener {
@@ -11,13 +10,14 @@ class RefreshAllLiveData(context: Context) : LiveData<List<Article>>()
 
     override fun onInactive() {
         parser.stopParse()
+        value = emptyList()
     }
 
     override fun onActive() {
-        AsyncTask.execute { parser.parse() }
+        parser.parse()
     }
 
     override fun onParsed(articles: List<Article>) {
-        postValue(articles)
+        if (hasActiveObservers()) postValue(articles)
     }
 }

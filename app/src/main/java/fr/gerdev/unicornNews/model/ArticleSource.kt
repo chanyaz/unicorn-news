@@ -1,6 +1,7 @@
 package fr.gerdev.unicornNews.model
 
 enum class ArticleSource(val url: String, val category: ArticleCategory, val device: ArticleDevice, val description: String) {
+
 //    ZERO1NET("http://www.01net.com/rss/actualites/jeux/",
 //            ArticleCategory.GENERAL,
 //            ArticleDevice.ALL,
@@ -247,9 +248,18 @@ enum class ArticleSource(val url: String, val category: ArticleCategory, val dev
     XBOX_GAME("http://www.xbox-gamer.net/rss.php",
             ArticleCategory.GENERAL,
             ArticleDevice.XBOX_ONE,
-            "xbox-gamer.fr"),
+            "xbox-gamer.fr");
 
-     //little bonus ;)
+
+    companion object {
+
+        fun byUrl(url: String): ArticleSource? {
+            ArticleSource.values().forEach { if (it.url == url) return it }
+            return null
+        }
+    }
+
+    //little bonus ;)
 //     PODCAST_PORNDIG("https://www.porndig.com/rss/top/videos.xml",
 //            ArticleCategory.VIDEO,
 //            ArticleDevice.MOBILE,

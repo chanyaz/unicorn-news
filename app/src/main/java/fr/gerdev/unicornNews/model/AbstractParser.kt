@@ -1,6 +1,9 @@
 package fr.gerdev.unicornNews.model
 
 import android.content.Context
+import android.os.AsyncTask
+import android.os.Handler
+import android.os.Looper
 import fr.gerdev.unicornNews.extension.toArticleEntry
 import fr.gerdev.unicornNews.repository.ArticleRepository
 import fr.gerdev.unicornNews.rest.RssService
@@ -48,6 +51,7 @@ abstract class AbstractParser(context: Context,
 
 
     private val callsQueue = ConcurrentLinkedQueue<Call<RssFeed>>()
+    private val callsProcessing = ConcurrentLinkedQueue<Call<RssFeed>>()
     private val articleParsed = ConcurrentLinkedQueue<Article>()
 
     private val finished = AtomicBoolean(false)
@@ -68,7 +72,14 @@ abstract class AbstractParser(context: Context,
     fun stopParse() {
         // cancel pending requests
         callsQueue.forEach { it.cancel() }
+        val queueSize = callsQueue.size
+        if (queueSize > 0) Timber.e("stopping $queueSize not executed calls")
 
+        callsProcessing.forEach { it.cancel() }
+        val processingSize = callsProcessing.size
+        if (processingSize > 0) Timber.e("stopping $processingSize executing calls")
+
+        // stop bdd access properly
         finished.set(true)
 
         Timber.e("canceling ${callsQueue.size} calls, ${callsQueue.filter { it.isExecuted }} beeing performed")
@@ -77,7 +88,8 @@ abstract class AbstractParser(context: Context,
     private fun proceedNext() {
         if (callsQueue.size == 0) finish()
         else {
-            val newCall = callsQueue.last()
+            val newCall = callsQueue.poll()
+            callsProcessing.offer(newCall)
             newCall.enqueue(
                     object : Callback<RssFeed> {
                         override fun onFailure(call: Call<RssFeed>?, t: Throwable?) {
@@ -85,20 +97,24 @@ abstract class AbstractParser(context: Context,
                         }
 
                         override fun onResponse(call: Call<RssFeed>?, response: Response<RssFeed>?) {
-                            val body = response?.body()
+                            AsyncTask.execute {
+                                val body = response?.body()
 
-                            if (response?.isSuccessful == true &&
-                                    body != null &&
-                                    body.items.size != 0) {
-                                body.items.forEach {
-                                    articleParsed.offer(it.toArticleEntry(
-                                            ArticleSource.valueOf(newCall.request().url().toString())
-                                    ))
+                                if (response?.isSuccessful == true &&
+                                        body != null &&
+                                        body.items.size != 0) {
+                                    body.items.forEach {
+
+                                        val url = newCall.request().url().toString()
+                                        articleParsed.offer(it.toArticleEntry(
+                                                ArticleSource.byUrl(url)!!
+                                        ))
+                                    }
+                                } else {
+                                    Timber.w("RSS server response not successfull, skipping")
                                 }
-                            } else {
-                                Timber.w("RSS server response not successfull, skipping")
+                                next(newCall)
                             }
-                            next(newCall)
                         }
                     })
         }
@@ -111,23 +127,30 @@ abstract class AbstractParser(context: Context,
 
 
     private fun finish() {
-        val iterator = articleParsed.iterator()
-        while (iterator.hasNext()) {
+        AsyncTask.execute {
+            val iterator = articleParsed.iterator()
+            while (iterator.hasNext()) {
 
-            //stop filtering if finished, checking article exist if a "long" way that need to be stopped
-            if (finished.get()) return
+                //stop filtering if finished, checking article exist if a long task
+                if (!finished.get()) {
 
-            val article = iterator.next()
+                    val article = iterator.next()
 
-            //remove if exists
-            if (articleRepository.exists(article)) iterator.remove()
+                    //remove if exists
+                    if (articleRepository.exists(article)) iterator.remove()
+                }
+            }
+
+            //prevent inserting
+            if (!finished.get()) {
+
+                Timber.e("inserting ${articleParsed.size} articles")
+                articleRepository.insertAll(articleParsed.toList())
+                Timber.e("inserted ${articleParsed.size} articles")
+
+                finished.set(true)
+                Handler(Looper.getMainLooper()).post { listener.onParsed(articleParsed.toList()) }
+            }
         }
-
-        Timber.e("inserting ${articleParsed.size} articles")
-        articleRepository.insertAll(articleParsed.toList())
-        Timber.e("inserted ${articleParsed.size} articles")
-
-        finished.set(true)
-        listener.onParsed(articleParsed.toList())
     }
 }
