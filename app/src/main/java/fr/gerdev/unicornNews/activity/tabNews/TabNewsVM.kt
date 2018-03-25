@@ -9,15 +9,15 @@ import fr.gerdev.unicornNews.model.*
 class TabNewsVM(private val app: Application) : AndroidViewModel(app) {
 
     fun getArticles(category: ArticleCategory, device: ArticleDevice, forceRefresh: Boolean): LiveData<List<Article>> {
-        return ArticleLiveData(category, device, app, forceRefresh)
+        return CategoryDeviceLiveData(category, device, app, forceRefresh)
     }
 
     fun searchArticles(query: String): LiveData<List<Article>> {
-        return SearchedArticleLiveData(query, app)
+        return SearchLiveData(query, app)
     }
 
-    fun updateAllArticles(): LiveData<Boolean> {
-        return UpdateArticleLiveData(app)
+    fun updateAllArticles(): LiveData<List<Article>> {
+        return RefreshAllLiveData(app)
     }
 }
 

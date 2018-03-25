@@ -2,6 +2,5 @@ package fr.gerdev.unicornNews.model
 
 
 interface ArticleParseListener {
-    fun onParsedAndFiltered(articles: List<Article>)
-    fun onParseFinished(refreshedSourcesCount: Int)
+    fun onParsed(articles: List<Article>)
 }

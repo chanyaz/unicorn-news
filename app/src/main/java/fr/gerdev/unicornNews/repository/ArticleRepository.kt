@@ -1,18 +1,11 @@
 package fr.gerdev.unicornNews.repository
 
 import android.content.Context
-import android.content.Intent
-import android.support.v4.content.LocalBroadcastManager
 import fr.gerdev.unicornNews.database.AppDatabase
 import fr.gerdev.unicornNews.model.Article
-import fr.gerdev.unicornNews.model.ArticleParseListener
-import fr.gerdev.unicornNews.model.ArticleParser
+import fr.gerdev.unicornNews.model.ArticleCategory
+import fr.gerdev.unicornNews.model.ArticleDevice
 import fr.gerdev.unicornNews.model.ArticleSource
-import fr.gerdev.unicornNews.rest.RssService
-import fr.gerdev.unicornNews.util.Prefs
-import me.toptas.rssconverter.RssConverterFactory
-import retrofit2.Retrofit
-import timber.log.Timber
 
 class ArticleRepository(private val context: Context) {
 
@@ -20,15 +13,16 @@ class ArticleRepository(private val context: Context) {
         const val INTENT_ACTION_DATA_FETCHED = "intent_action_refreshed"
     }
 
-    private var parser: ArticleParser? = null
-    private var rssService: RssService = Retrofit.Builder()
-            .baseUrl("http://www.toPreventRunTimeException.com")
-            .addConverterFactory(RssConverterFactory.create())
-            .build()
-            .create(RssService::class.java)
-
-    fun readStoredArticles(sources: List<ArticleSource>): List<Article> {
-        return AppDatabase.getInstance(context).articleDao().getBySources(sources.map { it.name })
+    fun read(category: ArticleCategory, device: ArticleDevice): List<Article> {
+        return AppDatabase
+                .getInstance(context)
+                .articleDao()
+                .getBySources(
+                        ArticleSource
+                                .values()
+                                .filter { it.category == category && it.device == device }
+                                .map { it.name }
+                )
     }
 
     fun searchArticles(query: String): List<Article> {
@@ -43,46 +37,16 @@ class ArticleRepository(private val context: Context) {
         }
     }
 
-    fun updateArticles(sources: List<ArticleSource>) {
-        Timber.i("${sources.size} source(s) to refresh")
-
-        stopParse()
-        parser = ArticleParser(object : ArticleParseListener {
-
-            override fun onParsedAndFiltered(articles: List<Article>) {
-
-                val articleDao = AppDatabase
-                        .getInstance(context)
-                        .articleDao()
-
-                articleDao.insertAll(
-                        *articles.toTypedArray())
-
-                sources.forEach {
-                    Prefs.updateRefreshTime(context, it)
-                }
-            }
-
-            override fun onParseFinished(refreshedSourcesCount: Int) {
-                val localIntent = Intent(INTENT_ACTION_DATA_FETCHED)
-                //TODO ADD CATEGORY AND DEVICE, OR SPECIFY ALL SOURCE LOADED
-                LocalBroadcastManager.getInstance(context).sendBroadcast(localIntent)
-            }
-        }, rssService, this)
-
-        parser?.parse(sources)
-    }
-
-    fun updateAllArticles() {
-        updateArticles(ArticleSource.values().toList())
-    }
-
     fun exists(it: Article): Boolean = AppDatabase
             .getInstance(context)
             .articleDao()
             .exists(it.title, it.description, it.link)
 
-    fun stopParse() {
-        parser?.stopParse()
+
+    fun insertAll(articles: List<Article>) {
+        AppDatabase
+                .getInstance(context)
+                .articleDao()
+                .insertAll(*articles.toTypedArray())
     }
 }

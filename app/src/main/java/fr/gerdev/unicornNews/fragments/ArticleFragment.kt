@@ -15,6 +15,7 @@ import fr.gerdev.unicornNews.model.Article
 import fr.gerdev.unicornNews.model.ArticleCategory
 import fr.gerdev.unicornNews.model.ArticleDevice
 import fr.gerdev.unicornNews.repository.ArticleRepository
+import fr.gerdev.unicornNews.repository.ArticleRepository.Companion.INTENT_ACTION_DATA_FETCHED
 import kotlinx.android.synthetic.main.fragment_article.*
 
 class ArticleFragment : BaseArticleFragment() {
@@ -25,8 +26,8 @@ class ArticleFragment : BaseArticleFragment() {
 
     companion object {
         const val EXTRA_CATEGORY = "extra_category"
+        const val EXTRA_DEVICE = "extra_device"
 
-        private const val EXTRA_DEVICE = "extra_device"
         fun newInstance(category: ArticleCategory, device: ArticleDevice): ArticleFragment {
             val fragment = ArticleFragment()
             val args = Bundle()
@@ -56,7 +57,6 @@ class ArticleFragment : BaseArticleFragment() {
         val filter = IntentFilter()
 
         receiver = buildReceiver()
-
         filter.addAction(ArticleRepository.INTENT_ACTION_DATA_FETCHED)
         filter.addAction(INTENT_ACTION_REFRESH_DATA)
         LocalBroadcastManager.getInstance(context!!).registerReceiver(receiver, filter)
@@ -70,9 +70,12 @@ class ArticleFragment : BaseArticleFragment() {
                     INTENT_ACTION_REFRESH_DATA -> {
                         parseIntentActionRefreshDataExtras(intent)
                         getArticles(true)
+                    }
 
-                        //TODO CHECK CATEGORY AND DEVICE CORRESPOND TO THIS FRAGMENT TO STOP REFRESH
-                        swipeRefresh.isRefreshing = false
+                    INTENT_ACTION_DATA_FETCHED -> {
+                        val extraCategory = ArticleCategory.valueOf(intent.getStringExtra(EXTRA_CATEGORY))
+                        val extraDevice = ArticleDevice.valueOf(intent.getStringExtra(EXTRA_DEVICE))
+                        if (category == extraCategory && device == extraDevice) swipeRefresh.isRefreshing = false
                     }
                 }
             }

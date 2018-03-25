@@ -7,10 +7,9 @@ import timber.log.Timber
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
-class SearchedArticleLiveData(private val query: String, private val context: Context) : LiveData<List<Article>>() {
+class SearchLiveData(private val query: String, private val context: Context) : LiveData<List<Article>>() {
 
     private lateinit var articleRepository: ArticleRepository
-
     private lateinit var executor: ExecutorService
 
     override fun onInactive() {
@@ -20,15 +19,15 @@ class SearchedArticleLiveData(private val query: String, private val context: Co
     override fun onActive() {
         articleRepository = ArticleRepository(context)
         executor = Executors.newSingleThreadExecutor()
-        executor.execute(ArticleSearchLoader())
+        executor.execute(Loader())
     }
 
-    inner class ArticleSearchLoader : Runnable {
+    inner class Loader : Runnable {
         override fun run() {
             try {
                 postValue(articleRepository.searchArticles(query))
             } catch (e: InterruptedException) {
-                Timber.e("ArticleSearchLoader with query $query interrupted")
+                Timber.e("Loader with query $query interrupted")
             }
         }
     }

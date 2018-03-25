@@ -22,6 +22,7 @@ import fr.gerdev.unicornNews.adapter.ArticleFragmentPagerAdapter
 import fr.gerdev.unicornNews.adapter.MonoFragmentPagerAdapter
 import fr.gerdev.unicornNews.fragments.ArticleFragment
 import fr.gerdev.unicornNews.fragments.BaseArticleFragment
+import fr.gerdev.unicornNews.model.Article
 import fr.gerdev.unicornNews.model.ArticleCategory
 import kotlinx.android.synthetic.main.activity_tab_news.*
 import timber.log.Timber
@@ -43,7 +44,7 @@ class TabNewsActivity : AppCompatActivity(), BaseArticleFragment.Listener, Artic
     private var verticalAppbarOffset = 0
     private var bottomSheetShowable = true
 
-    private var updateLiveData: LiveData<Boolean>? = null
+    private var updateLiveData: LiveData<List<Article>>? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -189,9 +190,9 @@ class TabNewsActivity : AppCompatActivity(), BaseArticleFragment.Listener, Artic
             val vm = ViewModelProviders.of(this).get(TabNewsVM::class.java)
             updateLiveData?.removeObservers(this)
             updateLiveData = vm.updateAllArticles()
-            updateLiveData?.observe(this, Observer<Boolean> { success ->
+            updateLiveData?.observe(this, Observer<List<Article>> { r ->
                 Snackbar.make(findViewById(android.R.id.content)!!
-                        , getString(R.string.all_sources_refreshed), Snackbar.LENGTH_LONG).show()
+                        , getString(R.string.all_sources_refreshed) + ",${r?.size} new articles ", Snackbar.LENGTH_LONG).show()
             })
 
             broadcastRefresh()
