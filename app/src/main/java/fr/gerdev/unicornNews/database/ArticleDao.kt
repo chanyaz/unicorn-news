@@ -9,6 +9,12 @@ import fr.gerdev.unicornNews.model.Article
 // ger 03/03/18
 @Dao
 interface ArticleDao {
+    @get:Query("SELECT * FROM article")
+    val all: List<Article>
+
+    @Query("SELECT * FROM article WHERE id IN (:arg0)")
+    fun loadAllByIds(articleIds: IntArray): List<Article>
+
     @Query("SELECT * FROM article WHERE source IN (:arg0) ORDER BY downloadDate desc")
     fun getBySources(sourceNames: List<String>): List<Article>
 
@@ -18,9 +24,14 @@ interface ArticleDao {
             "description like (:arg2) AND description like (:arg3) ORDER BY downloadDate desc")
     fun search(first: String = "%%", second: String = "%%", third: String = "%%", fourth: String = "%%"): List<Article>
 
-    @Deprecated("too slow if used many times")
-    @Query("SELECT COUNT(id)!=0 FROM article where title like (:arg0) or description like (:arg1) or link like (:arg2)")
-    fun exists(title: String?, description: String?, link: String?): Boolean
+    @Query("SELECT COUNT(id)=0 FROM article WHERE title  = (:arg0)")
+    fun titleNotExist(title: String?): Boolean
+
+    @Query("SELECT COUNT(id)=0 FROM article WHERE description  = (:arg0)")
+    fun descriptionNotExist(description: String?): Boolean
+
+    @Query("SELECT COUNT(id)=0 FROM article WHERE link  = (:arg0)")
+    fun linkNotExist(link: String?): Boolean
 
     @Query("UPDATE article SET read = 1 WHERE link  = (:arg0)")
     fun setReaded(link: String)

@@ -14,6 +14,7 @@ class SearchLiveData(private val query: String, private val context: Context) : 
 
     override fun onInactive() {
         executor.shutdownNow()
+        value = emptyList()
     }
 
     override fun onActive() {

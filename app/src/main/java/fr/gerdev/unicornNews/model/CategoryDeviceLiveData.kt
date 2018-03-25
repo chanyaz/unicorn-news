@@ -40,13 +40,16 @@ class CategoryDeviceLiveData(private var category: ArticleCategory,
     }
 
     override fun onParsed(articles: List<Article>) {
-        executor.execute((Loader()))
+        //may be shutdown if we got call back after unactive
+        if (!executor.isShutdown) {
+            if (articles.isNotEmpty()) executor.execute((Loader()))
 
-        val intent = Intent(ArticleRepository.INTENT_ACTION_DATA_FETCHED)
+            val intent = Intent(ArticleRepository.INTENT_ACTION_DATA_FETCHED)
 
-        intent.putExtra(ArticleFragment.EXTRA_CATEGORY, category.name)
-        intent.putExtra(ArticleFragment.EXTRA_DEVICE, device.name)
-        LocalBroadcastManager.getInstance(context).sendBroadcast(intent)
+            intent.putExtra(ArticleFragment.EXTRA_CATEGORY, category.name)
+            intent.putExtra(ArticleFragment.EXTRA_DEVICE, device.name)
+            LocalBroadcastManager.getInstance(context).sendBroadcast(intent)
+        }
     }
 
     inner class Loader : Runnable {

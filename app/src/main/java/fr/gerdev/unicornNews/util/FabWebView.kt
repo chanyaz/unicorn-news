@@ -4,7 +4,6 @@ import android.content.Context
 import android.support.design.widget.FloatingActionButton
 import android.util.AttributeSet
 import android.webkit.WebView
-import timber.log.Timber
 
 // ger 13/03/18
 class FabWebView
@@ -24,7 +23,6 @@ class FabWebView
 
     override fun onScrollChanged(l: Int, t: Int, oldl: Int, oldt: Int) {
         super.onScrollChanged(l, t, oldl, oldt)
-        Timber.e("old $oldt / new $t")
         if (t - oldt > SCROLL_THRESHOLD) floatingActionButton?.hide()
         else if (oldt - t > SCROLL_THRESHOLD) floatingActionButton?.show()
     }

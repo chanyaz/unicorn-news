@@ -192,7 +192,7 @@ class TabNewsActivity : AppCompatActivity(), BaseArticleFragment.Listener, Artic
             updateLiveData = vm.updateAllArticles()
             updateLiveData?.observe(this, Observer<List<Article>> { r ->
                 Snackbar.make(findViewById(android.R.id.content)!!
-                        , getString(R.string.all_sources_refreshed) + ",${r?.size} new articles ", Snackbar.LENGTH_LONG).show()
+                        , getString(R.string.all_sources_refreshed), Snackbar.LENGTH_LONG).show()
             })
 
             broadcastRefresh()

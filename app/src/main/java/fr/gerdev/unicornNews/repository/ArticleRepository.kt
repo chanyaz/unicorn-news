@@ -13,10 +13,12 @@ class ArticleRepository(private val context: Context) {
         const val INTENT_ACTION_DATA_FETCHED = "intent_action_refreshed"
     }
 
+    private val articleDao = AppDatabase
+            .getInstance(context)
+            .articleDao()
+
     fun read(category: ArticleCategory, device: ArticleDevice): List<Article> {
-        return AppDatabase
-                .getInstance(context)
-                .articleDao()
+        return articleDao
                 .getBySources(
                         ArticleSource
                                 .values()
@@ -27,7 +29,6 @@ class ArticleRepository(private val context: Context) {
 
     fun searchArticles(query: String): List<Article> {
         val words: List<String> = query.split(" ")
-        val articleDao = AppDatabase.getInstance(context).articleDao()
         return when (words.size) {
             0 -> articleDao.search()
             1 -> articleDao.search("%" + words[0] + "%")
@@ -37,16 +38,11 @@ class ArticleRepository(private val context: Context) {
         }
     }
 
-    fun exists(it: Article): Boolean = AppDatabase
-            .getInstance(context)
-            .articleDao()
-            .exists(it.title, it.description, it.link)
+    fun exists(it: Article): Boolean = !(articleDao.linkNotExist(it.description) && articleDao.descriptionNotExist(it.description) && articleDao.titleNotExist(it.title))
 
 
     fun insertAll(articles: List<Article>) {
-        AppDatabase
-                .getInstance(context)
-                .articleDao()
+        articleDao
                 .insertAll(*articles.toTypedArray())
     }
 }
