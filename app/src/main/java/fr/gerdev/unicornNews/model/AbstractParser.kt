@@ -103,8 +103,6 @@ abstract class AbstractParser(private var context: Context,
                                         body.items.size != 0) {
 
                                     body.items.forEach {
-
-                                        val url = newCall.request().url().toString()
                                         articleParsed.offer(it.toArticleEntry(
                                                 ArticleSource.byUrl(url)!!
 
