@@ -3,6 +3,7 @@
     package="fr.gerdev.unicornNews">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application
         android:name=".application.App"
@@ -24,10 +25,6 @@
         <activity
             android:name=".activity.detailNews.DetailNewsActivity"
             android:theme="@style/Theme.AppCompat.NoActionBar" />
-
-        <service
-            android:name=".service.RefreshService"
-            android:exported="false"></service>
     </application>
 
 </manifest>
