@@ -6,12 +6,12 @@
     android:layout_height="match_parent"
     tools:context=".activity.detailNews.DetailNewsActivity">
 
-    <fr.gerdev.unicornNews.util.FabWebView
+    <fr.gerdev.unicornNews.view.FabWebView
         android:id="@+id/articleWebView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-    </fr.gerdev.unicornNews.util.FabWebView>
+    </fr.gerdev.unicornNews.view.FabWebView>
 
     <RelativeLayout
         android:layout_width="wrap_content"

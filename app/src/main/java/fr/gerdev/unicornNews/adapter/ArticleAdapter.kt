@@ -14,13 +14,16 @@ import fr.gerdev.unicornNews.database.AppDatabase
 import fr.gerdev.unicornNews.extension.inflate
 import fr.gerdev.unicornNews.model.Article
 import fr.gerdev.unicornNews.util.DateUtil
+import fr.gerdev.unicornNews.util.NetworkUtils
 import kotlinx.android.synthetic.main.article_item_row.view.*
 
 
-class ArticleAdapter(private val context: Context, private val articles: List<Article>)
+class ArticleAdapter(private val context: Context,
+                     private val articles: List<Article>,
+                     private val listener: Listener)
     : RecyclerView.Adapter<ArticleAdapter.ArticlesVH>() {
 
-    class ArticlesVH(private val context: Context, v: View) : RecyclerView.ViewHolder(v), View.OnClickListener {
+    inner class ArticlesVH(v: View) : RecyclerView.ViewHolder(v), View.OnClickListener {
         private var view: View = v
         private var article: Article? = null
 
@@ -58,21 +61,25 @@ class ArticleAdapter(private val context: Context, private val articles: List<Ar
         private fun setTextColor() = view.articlesTextView.setTextColor(ContextCompat.getColor(context, if (article!!.read) R.color.colorPrimaryLight else R.color.colorPrimaryDark))
 
         override fun onClick(v: View) {
-            val context = itemView.context
-            val webIntent = Intent(context, DetailNewsActivity::class.java)
-            webIntent.putExtra(DetailNewsActivity.URL_KEY, article?.link)
-            context.startActivity(webIntent)
-            AsyncTask.execute {
-                AppDatabase.getInstance(context).articleDao().setReaded(article?.link ?: "")
+            if (NetworkUtils(context).isOnline()) {
+                val context = itemView.context
+                val webIntent = Intent(context, DetailNewsActivity::class.java)
+                webIntent.putExtra(DetailNewsActivity.URL_KEY, article?.link)
+                context.startActivity(webIntent)
+                AsyncTask.execute {
+                    AppDatabase.getInstance(context).articleDao().setReaded(article?.link ?: "")
+                }
+                article?.read = true
+                setTextColor()
+            } else {
+                listener.articleClickedWhenNoInternet()
             }
-            article?.read = true
-            setTextColor()
         }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ArticlesVH {
         val vh = parent.inflate(R.layout.article_item_row, false)
-        return ArticlesVH(context, vh)
+        return ArticlesVH(vh)
     }
 
     override fun getItemCount(): Int = articles.size
@@ -80,5 +87,9 @@ class ArticleAdapter(private val context: Context, private val articles: List<Ar
     override fun onBindViewHolder(holder: ArticlesVH, position: Int) {
         val article = articles.toTypedArray()[position]
         holder.bindArticle(article)
+    }
+
+    interface Listener {
+        fun articleClickedWhenNoInternet()
     }
 }

@@ -8,6 +8,7 @@ import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import android.support.annotation.ColorRes
+import android.support.design.widget.Snackbar
 import android.support.v4.app.Fragment
 import android.support.v4.content.ContextCompat
 import android.support.v7.widget.LinearLayoutManager
@@ -21,8 +22,7 @@ import fr.gerdev.unicornNews.model.Article
 import kotlinx.android.synthetic.main.fragment_article.*
 import java.util.*
 
-abstract class BaseArticleFragment : Fragment() {
-
+abstract class BaseArticleFragment : Fragment(), ArticleAdapter.Listener {
     private val articles: MutableList<Article> = mutableListOf()
 
     protected var adapter: ArticleAdapter? = null
@@ -38,7 +38,7 @@ abstract class BaseArticleFragment : Fragment() {
     override fun onAttach(context: Context?) {
         super.onAttach(context)
         listener = context as Listener
-        adapter = ArticleAdapter(context, articles)
+        adapter = ArticleAdapter(context, articles, this)
     }
 
     override fun onDetach() {
@@ -119,6 +119,13 @@ abstract class BaseArticleFragment : Fragment() {
 
         if (articles.isNotEmpty()) emptyMsg.visibility = View.GONE
         else emptyMsg.visibility = View.VISIBLE
+    }
+
+    override fun articleClickedWhenNoInternet() {
+        if (activity != null)
+            Snackbar.make(activity!!.findViewById(android.R.id.content)!!,
+                    context!!.getString(R.string.article_cannot_consult_offline),
+                    Snackbar.LENGTH_LONG).show()
     }
 
     interface Listener

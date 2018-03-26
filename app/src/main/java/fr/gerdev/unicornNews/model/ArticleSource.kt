@@ -7,9 +7,9 @@ enum class ArticleSource(val url: String, val category: ArticleCategory, val dev
 //            ArticleDevice.ALL,
 //            "01net.com"),
 
-    AFJV("https://www.afjv.com/afjv_rss.xml", ArticleCategory.GENERAL, ArticleDevice.ALL, "afjv.com"),
-
     ACTUGAMING("https://www.actugaming.net/feed/", ArticleCategory.GENERAL, ArticleDevice.ALL, "actugaming.net"),
+
+    AFJV("https://www.afjv.com/afjv_rss.xml", ArticleCategory.GENERAL, ArticleDevice.ALL, "afjv.com"),
 
     CLUBIC_JEUXVIDEO("http://www.clubic.com/xml/articlejeuxvideo.xml",
             ArticleCategory.GENERAL,

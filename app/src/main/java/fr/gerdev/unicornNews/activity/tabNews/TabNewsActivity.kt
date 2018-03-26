@@ -3,9 +3,7 @@ package fr.gerdev.unicornNews.activity.tabNews
 import android.arch.lifecycle.LiveData
 import android.arch.lifecycle.Observer
 import android.arch.lifecycle.ViewModelProviders
-import android.content.Context
 import android.content.Intent
-import android.net.ConnectivityManager
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.support.design.widget.AppBarLayout
@@ -27,6 +25,7 @@ import fr.gerdev.unicornNews.fragments.BaseArticleFragment
 import fr.gerdev.unicornNews.model.Article
 import fr.gerdev.unicornNews.model.ArticleCategory
 import fr.gerdev.unicornNews.model.ArticleSource
+import fr.gerdev.unicornNews.util.NetworkUtils
 import kotlinx.android.synthetic.main.activity_tab_news.*
 import timber.log.Timber
 
@@ -192,7 +191,7 @@ class TabNewsActivity : AppCompatActivity(), BaseArticleFragment.Listener, Artic
 
             val vm = ViewModelProviders.of(this).get(TabNewsVM::class.java)
             updateLiveData?.removeObservers(this)
-            if (isOnline()) {
+            if (NetworkUtils(this).isOnline()) {
 
                 snackbar(getString(R.string.sources_refreshed_start, ArticleSource.values().size))
 
@@ -212,12 +211,6 @@ class TabNewsActivity : AppCompatActivity(), BaseArticleFragment.Listener, Artic
             }
         }
         return true
-    }
-
-    private fun isOnline(): Boolean {
-        val cm = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        val netInfo = cm.activeNetworkInfo
-        return netInfo != null && netInfo.isConnected
     }
 
     private fun snackbar(message: String) {

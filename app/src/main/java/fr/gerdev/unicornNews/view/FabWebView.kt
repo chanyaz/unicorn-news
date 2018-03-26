@@ -1,4 +1,4 @@
-package fr.gerdev.unicornNews.util
+package fr.gerdev.unicornNews.view
 
 import android.content.Context
 import android.support.design.widget.FloatingActionButton

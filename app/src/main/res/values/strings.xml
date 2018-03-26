@@ -8,7 +8,8 @@
     <string name="no_article">Aucun article</string>
     <string name="menu_refresh">Rafraîchir</string>
     <string name="article_photo">article photo</string>
-    <string name="sources_refreshed_no_internet">Internet est déconnecté</string>
+    <string name="article_cannot_consult_offline">Activez votre connexion internet pour consulter un article</string>
+    <string name="sources_refreshed_no_internet">Activez votre connexion internet pour rafraîchir toutes les sources.</string>
     <string name="sources_refreshed_start">%d sources en cours de rafraichissement</string>
     <string name="sources_refreshed_end_no_new_article">Aucun nouvel article</string>
     <string name="sources_refreshed_end_one_article">1 nouvel article</string>

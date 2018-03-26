@@ -133,7 +133,7 @@ abstract class AbstractParser(private var context: Context,
             if (articleParsed.size > 0) {
                 val iterator = articleParsed.iterator()
                 val start = System.currentTimeMillis()
-                Timber.e("start filtering ${articleParsed.size} articles")
+                Timber.i("start filtering ${articleParsed.size} articles")
                 while (iterator.hasNext()) {
 
                     //stop filtering if finished, checking article exist if a long task
@@ -145,14 +145,14 @@ abstract class AbstractParser(private var context: Context,
                         if (articleRepository.exists(article)) iterator.remove()
                     } else break
                 }
-                Timber.e("filtering articles took ${System.currentTimeMillis() - start} ms")
+                Timber.i("filtering articles took ${System.currentTimeMillis() - start} ms")
 
                 //prevent inserting
                 if (!finished.get()) {
 
                     if (articleParsed.isNotEmpty()) {
                         articleRepository.insertAll(articleParsed.toList())
-                        Timber.e("inserted ${articleParsed.size} articles")
+                        Timber.i("inserted ${articleParsed.size} articles")
                     }
                 }
             }
