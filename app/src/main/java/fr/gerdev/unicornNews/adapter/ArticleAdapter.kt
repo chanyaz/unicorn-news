@@ -35,14 +35,11 @@ class ArticleAdapter(private val context: Context,
             this.article = article
             view.articlesTextView.text = article.title
             setTextColor()
-            Picasso
-                    .with(context)
-                    .cancelRequest(view.articleImage)
 
             if (article.image != null) {
                 view.articleImageContainer.visibility = View.VISIBLE
 
-                Picasso.with(context)
+                Picasso.get()
                         .load(article.image)
                         .fit()
                         .centerCrop()
